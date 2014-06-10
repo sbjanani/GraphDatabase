@@ -20,6 +20,7 @@ public class GraphIndex {
 		ArrayList<int[]> edgeArray = new ArrayList<int[]>();
 		
 		// code goes here
+		System.out.println("Todays Hello");
 		
 		return edgeArray;
 		
