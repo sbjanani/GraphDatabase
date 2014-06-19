@@ -4,4 +4,4 @@ public class EdgeTypeIndex {
 int x;
 String edge;
 }
-//x=2
+//x=2mhfjhf
