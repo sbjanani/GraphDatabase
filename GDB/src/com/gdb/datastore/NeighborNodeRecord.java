@@ -1,12 +1,14 @@
 package com.gdb.datastore;
 
-public class NeighborNodeRecord {
+public class NeighborNodeRecord implements Comparable {
 	public int neighborNode;
 	public byte edgeType;
+	public int edgeNumber;
 	
 	public NeighborNodeRecord(int n, byte b) {
 		neighborNode = n;
 		edgeType = b;
+		edgeNumber = -1;
 	}
 	
 	public int getNeighborNode() {
@@ -23,6 +25,15 @@ public class NeighborNodeRecord {
 	
 	public void setEdgeType(byte edgeType) {
 		this.edgeType = edgeType;
+	}
+
+	public int compareTo(Object arg0) {
+		NeighborNodeRecord n = (NeighborNodeRecord)(arg0);
+		return this.neighborNode - n.neighborNode;
+	}
+	
+	public String toString(){
+		return "neighborNode = "+neighborNode + "edgeType= "+edgeType + "edgeNumber = "+edgeNumber;
 	}
 	
 	

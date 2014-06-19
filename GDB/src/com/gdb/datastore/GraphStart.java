@@ -16,8 +16,9 @@ public class GraphStart {
          * @throws IOException 
          */
         public static void main(String args[]) throws IOException{
-                GraphIndex gi = new GraphIndex("nodes.dat");
-                ArrayList<AdjacencyRecord> a = gi.readGraph("rel.dat");
+                GraphIndex gi = new GraphIndex("nodes1.dat");
+                ArrayList<AdjacencyRecord> a = gi.readGraph("rel1.dat");
+                System.out.println(a);
                 /*for(int i = 0; i < a.size(); i++){
                         System.out.print("i= "+i);
                         for(int j = 0; j < a.get(i).length; j++){
@@ -25,7 +26,7 @@ public class GraphStart {
                         }
                         System.out.println();
                 }*/
-                GraphIndex g = new GraphIndex("nodes.dat");
-                g.writeGraph("/Users/Naveen/git/GraphDatabase/GDB/graphIndex.idx",a);
+                GraphIndex g = new GraphIndex("nodes1.dat");
+                g.writeGraph(args[0],a);
         }
 }

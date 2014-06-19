@@ -85,5 +85,9 @@ public class AdjacencyRecord {
 		this.outGoingEdgeBitMap = edgeBitMap;
 	}
 	
+	public String toString(){
+		return "incoming = "+inComing + "\n" + "outoing= "+outGoing + "\n\n";
+	}
+	
 	
 }
