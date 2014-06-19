@@ -18,7 +18,7 @@ public class NeighborNodeRecord implements Comparable {
 	public void setNeighborNode(int neighborNode) {
 		this.neighborNode = neighborNode;
 	}
-	
+	//change mades
 	public byte getEdgeType() {
 		return edgeType;
 	}
