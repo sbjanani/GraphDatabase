@@ -121,15 +121,35 @@ public class GraphIndex {
             			eNumber = newEdgeNumber;
             			incoming.get(in).edgeNumber = eNumber;
             			setEdgeNumberOutGoing(edgeArray,i,incoming.get(in).neighborNode,eNumber);
+            			int offSet = incoming.get(in).neighborNode -i;
+                		System.out.println("OFFSET = "+offSet);
+                		eBuffer[0] = nodeTypes[i];
+                		eBuffer[1] = nodeTypes[incoming.get(in).neighborNode];
+                		eBuffer[2] = (byte)(offSet>>>24);
+                		eBuffer[3] = (byte)(offSet>>>16);
+                		eBuffer[4] = (byte)(offSet>>>8);
+                		eBuffer[5] = (byte)(offSet);
+                		eFile.write(eBuffer);
+            			newEdgeNumber++;
             		}
-            		else
+            		else{
             			eNumber = getOutGoingEdgeNumber(i,incoming.get(in).neighborNode,edgeArray);
+            			if(i == 3)
+            				System.out.println("E NUMBER = "+eNumber);
+            		}
             		if(neighborCount <= Constants.MAX_EDGES_NODES_DAT){
             			nBuffer[5*in] = 0;
             			nBuffer[5*in+1] = (byte)(eNumber>>>24);
             			nBuffer[5*in+2] = (byte)(eNumber>>>16);
             			nBuffer[5*in+3] = (byte)(eNumber>>>8);
             			nBuffer[5*in+4] = (byte)eNumber;
+            			if(i == 3){
+            				System.out.println("in = "+in);
+            				System.out.println("INCOMING "+nBuffer[5*in+1]);
+            				System.out.println("INCOMING "+nBuffer[5*in+2]);
+            				System.out.println("INCOMING "+nBuffer[5*in+3]);
+            				System.out.println("INCOMING "+nBuffer[5*in+4]);
+            			}
             		}
             		else{
             			oBuffer[overFlowCounter++] = 0;
@@ -138,15 +158,6 @@ public class GraphIndex {
             			oBuffer[overFlowCounter++] = (byte)(eNumber>>>8);
             			oBuffer[overFlowCounter++] = (byte)eNumber;
             		}
-            		int offSet = in -i;
-            		eBuffer[0] = nodeTypes[i];
-            		eBuffer[1] = nodeTypes[in];
-            		eBuffer[2] = (byte)(offSet>>>24);
-            		eBuffer[3] = (byte)(offSet>>>16);
-            		eBuffer[4] = (byte)(offSet>>>8);
-            		eBuffer[5] = (byte)(offSet);
-            		eFile.write(eBuffer);
-            		newEdgeNumber++;
             	}
             	for(int out = 0; out < outgoing.size(); out++){
             		System.out.println("out= "+out);
@@ -155,38 +166,46 @@ public class GraphIndex {
             			eNumber = newEdgeNumber;
             			outgoing.get(out).edgeNumber = eNumber;
             			setEdgeNumberIncoming(edgeArray,i,outgoing.get(out).neighborNode,eNumber);
+            			int offSet =  i - outgoing.get(out).neighborNode;
+                		eBuffer[0] = nodeTypes[outgoing.get(out).neighborNode];
+                		eBuffer[1] = nodeTypes[i];
+                		eBuffer[2] = (byte)(offSet>>>24);
+                		eBuffer[3] = (byte)(offSet>>>16);
+                		eBuffer[4] = (byte)(offSet>>>8);
+                		eBuffer[5] = (byte)(offSet);
+                		eFile.write(eBuffer);
+            			newEdgeNumber++;
             		}
             		else
             			eNumber = getIncomingEdgeNumber(i,outgoing.get(out).neighborNode,edgeArray);
             		if(neighborCount <= Constants.MAX_EDGES_NODES_DAT){
-            			nBuffer[5*out] = 0;
-            			nBuffer[5*out+1] = (byte)(eNumber>>>24);
-            			nBuffer[5*out+2] = (byte)(eNumber>>>16);
-            			nBuffer[5*out+3] = (byte)(eNumber>>>8);
-            			nBuffer[5*out+4] = (byte)eNumber;
+            			nBuffer[5*(out+incoming.size())] = 1;
+            			nBuffer[5*(out+incoming.size())+1] = (byte)(eNumber>>>24);
+            			nBuffer[5*(out+incoming.size())+2] = (byte)(eNumber>>>16);
+            			nBuffer[5*(out+incoming.size())+3] = (byte)(eNumber>>>8);
+            			nBuffer[5*(out+incoming.size())+4] = (byte)eNumber;
+            			if(i == 3){
+            				System.out.println("OUT = "+out);
+            				System.out.println("OUTGOING "+nBuffer[5*out+1]);
+            				System.out.println("OUTGOING "+nBuffer[5*out+2]);
+            				System.out.println("OUTGOING "+nBuffer[5*out+3]);
+            				System.out.println("OUTGOING "+nBuffer[5*out+4]);
+            			}
             		}
             		else{
-            			oBuffer[overFlowCounter++] = 0;
+            			oBuffer[overFlowCounter++] = 1;
             			oBuffer[overFlowCounter++] = (byte)(eNumber>>>24);
             			oBuffer[overFlowCounter++] = (byte)(eNumber>>>16);
             			oBuffer[overFlowCounter++] = (byte)(eNumber>>>8);
             			oBuffer[overFlowCounter++] = (byte)eNumber;
             		}
-            		/*int offSet =  i - out;
-            		eBuffer[0] = nodeTypes[out];
-            		eBuffer[1] = nodeTypes[i];
-            		eBuffer[2] = (byte)(offSet>>>24);
-            		eBuffer[3] = (byte)(offSet>>>16);
-            		eBuffer[4] = (byte)(offSet>>>8);
-            		eBuffer[5] = (byte)(offSet);*/
-            		//eFile.write(eBuffer);
-            		newEdgeNumber++;
             	}
             	int correctOverFlowCounter = overFlowCounter - (incoming.size() +outgoing.size() -Constants.MAX_EDGES_NODES_DAT);
             	nBuffer[5*Constants.MAX_EDGES_NODES_DAT] = (byte)correctOverFlowCounter;
     			nBuffer[5*Constants.MAX_EDGES_NODES_DAT+1] = (byte)(correctOverFlowCounter>>>8);
     			nBuffer[5*Constants.MAX_EDGES_NODES_DAT+2] = (byte)(correctOverFlowCounter>>>16);
     			nBuffer[5*Constants.MAX_EDGES_NODES_DAT+3] = (byte)(correctOverFlowCounter>>>24);
+    			
     			nFile.write(nBuffer);
     			if(oBuffer != null)
     				oFile.write(oBuffer);
@@ -197,8 +216,8 @@ public class GraphIndex {
        }
 
 		private void setEdgeNumberIncoming(
-				ArrayList<AdjacencyRecord> edgeArray, int neighborNode,
-				int eNumber, int node1) {
+				ArrayList<AdjacencyRecord> edgeArray, int node1, int neighborNode,
+				int eNumber) {
 			for(int j = 0; j < edgeArray.get(neighborNode).inComing.size(); j++){
 				if(edgeArray.get(neighborNode).inComing.get(j).neighborNode == node1)
 					edgeArray.get(neighborNode).inComing.get(j).edgeNumber = eNumber;
@@ -206,8 +225,8 @@ public class GraphIndex {
 		}
 		
 		private void setEdgeNumberOutGoing(
-				ArrayList<AdjacencyRecord> edgeArray, int neighborNode,
-				int eNumber, int node1) {
+				ArrayList<AdjacencyRecord> edgeArray,int node1, int neighborNode,
+				int eNumber) {
 			for(int j = 0; j < edgeArray.get(neighborNode).outGoing.size(); j++){
 				if(edgeArray.get(neighborNode).outGoing.get(j).neighborNode == node1)
 					edgeArray.get(neighborNode).outGoing.get(j).edgeNumber = eNumber;
