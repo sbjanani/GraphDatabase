@@ -3,6 +3,7 @@ package com.gdb.query;
 import java.util.ArrayList;
 import java.util.Map;
 
+
 /**
  * This class contains methods for the graph as a whole.
  * This is a starting point for general graph operations.
@@ -11,19 +12,21 @@ import java.util.Map;
  */
 public class Graph {
 
-	ArrayList<Index> graphIndex;
+	ArrayList<Integer> graphIndex;
+	Map<Integer, ArrayList<Integer>> typeIndex;
 	
 	// constructor for the graph
 	public Graph(){
 		
 		this.graphIndex = initializeGraphIndex("path");
+		this.typeIndex = initializeTypeIndex("path");
 	}
 	
 	
 	/**
 	 * @return the graphIndex
 	 */
-	public ArrayList<Index> getGraphIndex() {
+	public ArrayList<Integer> getGraphIndex() {
 		return graphIndex;
 	}
 
@@ -31,15 +34,35 @@ public class Graph {
 	 * This method initializes the graph index
 	 * @param path - path to graphIndex.idx 
 	 */
-	public ArrayList<Index> initializeGraphIndex(String path) {
+	public ArrayList<Integer> initializeGraphIndex(String path) {
 		
 
 
 		return null;
 	}
+	
+	/**
+	 * @return the graphIndex
+	 */
+	public Map<Integer, ArrayList<Integer>> getTypeIndex() {
+		return typeIndex;
+	}
+
+	/**
+	 * This method initializes the graph index
+	 * @param path - path to graphIndex.idx 
+	 */
+	public Map<Integer, ArrayList<Integer>> initializeTypeIndex(String path) {
+		
+
+
+		return null;
+	}
+	
 
 	/**
 	 * This method retrieves all vertices belonging to a given label
+	 * This method should work in conjunction with the index to retrieve vertices
 	 * @param labels - the label types that the vertex can belong to
 	 * @return - returns an ArrayList containing the vertex objects
 	 */
@@ -50,6 +73,7 @@ public class Graph {
 	
 	/**
 	 * This method retrieves all vertices belonging to a given label and containing the given attributes
+	 * This  method should work in conjunction with the index and MySqlConnectior to retrieve vertices
 	 * @param attributeMap - a map containing the attributes as key-value pairs
 	 * @param labels - the label types that the vertex can belong to
 	 * @return - returns an ArrayList containing the vertex objects
