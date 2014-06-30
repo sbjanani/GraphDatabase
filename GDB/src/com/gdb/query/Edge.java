@@ -15,8 +15,25 @@ public class Edge {
 	int headNodeLabel;
 	int tailNodeLabel;
 	int offset;
+	int id;
 	
 	
+	
+	
+	/**
+	 * @return the id
+	 */
+	public int getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(int id) {
+		this.id = id;
+	}
+
 	/**
 	 * @return the label
 	 */
@@ -51,28 +68,28 @@ public class Edge {
 	/**
 	 * @return the headNodeType
 	 */
-	public int getHeadNodeType() {
+	public int getHeadNodeLabel() {
 		return headNodeLabel;
 	}
 
 	/**
 	 * @param headNodeType the headNodeType to set
 	 */
-	public void setHeadNodeType(int headNodeType) {
+	public void setHeadNodeLabel(int headNodeType) {
 		this.headNodeLabel = headNodeType;
 	}
 
 	/**
 	 * @return the tailNodeType
 	 */
-	public int getTailNodeType() {
+	public int getTailNodeLabel() {
 		return tailNodeLabel;
 	}
 
 	/**
 	 * @param tailNodeType the tailNodeType to set
 	 */
-	public void setTailNodeType(int tailNodeType) {
+	public void setTailNodeLabel(int tailNodeType) {
 		this.tailNodeLabel = tailNodeType;
 	}
 

@@ -74,6 +74,7 @@ public class NodesTester {
 		else{
 			printOneRecord(nFile,iFile,record);
 		}
+		s.close();
 		iFile.close();
 		nFile.close();
 	}
