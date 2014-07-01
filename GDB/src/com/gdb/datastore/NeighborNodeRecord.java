@@ -33,7 +33,7 @@ public class NeighborNodeRecord implements Comparable {
 	}
 	
 	public String toString(){
-		return "neighborNode = "+neighborNode + "edgeType= "+edgeType + "edgeNumber = "+edgeNumber;
+		return "["+neighborNode + ","+edgeType + ","+edgeNumber+"]";
 	}
 	
 	

@@ -24,7 +24,7 @@ public class NodesTester {
 		return result;
 	}
 	
-	private static void printOneRecord(RandomAccessFile nFile,RandomAccessFile iFile,int record) throws IOException{
+	private static void printOneRecord(RandomAccessFile nFile,RandomAccessFile iFile,RandomAccessFile oFile,int record) throws IOException{
 		iFile.seek(record*35);
 		byte[] iBuffer = new byte[35];
 		iFile.read(iBuffer);
@@ -48,18 +48,36 @@ public class NodesTester {
 		nFile.seek(record*84);
 		byte[] buffer = new byte[84];
 	    nFile.read(buffer);
-		for(int i = 0; i < numEdges; i++){
+	    System.out.println("NUM EDGES: "+numEdges);
+	    
+		for(int i = 0; i < Math.min(16,numEdges); i++){
 			if(buffer[5*i] == 0)
 				System.out.print("InComing ");
 			else
 				System.out.print("OutGoing ");
 			System.out.println(bytesToInt(buffer[5*i+1],buffer[5*i+2],buffer[5*i+3],buffer[5*i+4]));	
 		}
+		
+		if(numEdges > 16){
+			byte [] oBuffer = new byte[5*(numEdges - 16)];
+			int pointer = bytesToInt(buffer[83],buffer[82],buffer[81],buffer[80]);
+		    System.out.println("POINTER: "+pointer);
+		    oFile.seek(pointer);
+		    oFile.read(oBuffer);
+			for(int i = 0; i < numEdges-16; i++){
+				if(oBuffer[5*i] == 0)
+					System.out.print("InComing ");
+				else
+					System.out.print("OutGoing ");
+				System.out.println(bytesToInt(oBuffer[5*i+1],oBuffer[5*i+2],oBuffer[5*i+3],oBuffer[5*i+4]));	
+			}
+		}
 	}
 	
 	public static void main(String[] args) throws IOException{
 		RandomAccessFile nFile = new RandomAccessFile("/Users/Naveen/DB1/nodes.dat","rw");
 		RandomAccessFile iFile = new RandomAccessFile("/Users/Naveen/DB1/graph.idx","rw");
+		RandomAccessFile oFile = new RandomAccessFile("/Users/Naveen/DB1/overFlow.dat","rw");
 		Scanner s = new Scanner(System.in);
 		System.out.println("Enter the number of the record you want to see or -1 to see the whole file: ");
 		int record = s.nextInt();
@@ -67,12 +85,12 @@ public class NodesTester {
 		if(record == -1){
 			for(int i = 0; i < nFile.length()/84; i++){
 				System.out.println("******************************");
-				printOneRecord(nFile,iFile,i);
+				printOneRecord(nFile,iFile,oFile,i);
 				System.out.println("******************************");
 			}
 		}
 		else{
-			printOneRecord(nFile,iFile,record);
+			printOneRecord(nFile,iFile,oFile,record);
 		}
 		iFile.close();
 		nFile.close();

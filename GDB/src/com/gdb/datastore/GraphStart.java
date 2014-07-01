@@ -18,11 +18,12 @@ public class GraphStart {
         public static void main(String args[]) throws IOException{
                 GraphIndex gi = new GraphIndex("nodes1.dat");
                 ArrayList<AdjacencyRecord> a = gi.readGraph("rel1.dat");
-                System.out.println(a);
-                for(int i = 0; i < a.size(); i++){
+                //System.out.println(a);
+                //for(int i = 0; i < a.size(); i++){
+                /*for(int i = 0; i < 5; i++){
                         System.out.print("i= "+i);
                         System.out.println(a.get(i));
-                }
+                }*/
                 GraphIndex g = new GraphIndex("nodes1.dat");
                 g.writeGraph(args[0],a);
         }

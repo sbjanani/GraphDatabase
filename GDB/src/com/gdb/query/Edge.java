@@ -83,8 +83,14 @@ public class Edge {
 	 * @return - returns the tail/out or head/in vertex. 
 	 */
 	public Vertex getVertex(Direction direction) throws IllegalArgumentException{
-		
-		return null;
+		if(direction.equals(Direction.BOTH))
+			throw new IllegalArgumentException("Direction cannot be BOTH");
+		Vertex v = new Vertex();
+		if(direction.equals(Direction.OUT))
+			v.setId(tailNodeLabel);
+		else
+			v.setId(headNodeLabel);
+		return v;
 	}
 	
 	/**
