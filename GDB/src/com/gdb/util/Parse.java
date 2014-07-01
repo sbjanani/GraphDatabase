@@ -1,4 +1,4 @@
-package util;
+package com.gdb.util;
 
 import java.util.ArrayList;
 

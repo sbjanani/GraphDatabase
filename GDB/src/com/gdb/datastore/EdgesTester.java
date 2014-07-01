@@ -48,6 +48,7 @@ public class EdgesTester {
 		else{
 			printOneRecord(eFile,record);
 		}
+		s.close();
 		eFile.close();
 	}
 }

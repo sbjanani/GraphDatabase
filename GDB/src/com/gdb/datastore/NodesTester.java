@@ -92,6 +92,7 @@ public class NodesTester {
 		else{
 			printOneRecord(nFile,iFile,oFile,record);
 		}
+		s.close();
 		iFile.close();
 		nFile.close();
 	}

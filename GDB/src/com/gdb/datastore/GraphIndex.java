@@ -28,6 +28,7 @@ public class GraphIndex {
                         if(s.hasNext())
                                 s.nextLine();
                 }
+                s.close();
         }
         
         /**
@@ -60,6 +61,8 @@ public class GraphIndex {
                 	Collections.sort(adjArray.get(i).inComing);
                 	Collections.sort(adjArray.get(i).outGoing);
                 }
+                
+                s.close();
                 return adjArray;
                 
         }
