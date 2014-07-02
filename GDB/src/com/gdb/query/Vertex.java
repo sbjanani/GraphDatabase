@@ -3,41 +3,46 @@ package com.gdb.query;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class Vertex {
+/**
+ * This class holds the methods related to a vertex.
+ * @author sysadmin
+ *
+ */
+public class Vertex extends Element{
 
-	int id;
-	String label;
+	/** This structure can hold the edges incident with the given vertex
+	 * This is a three dimensional arraylist structure. The first dimension specifies the edge type.
+	 * The second dimension is an arraylist containing the incoming edges at index 0 and outgoing edges at index 1
+	 * The third dimension is an arraylist containing the actual vertex ids.
+	 * A sample edges array would be of the form:
+	 * [<(1,2),(3,4)>, ----> This is the entry for edge type 0
+	 *    |     -----------> This is the outgoing edge list for edge type 0
+	 *    -----------------> This is the incoming edge list for edge type 0
+	 * <(5,6),(7,8)>,
+	 * <(9,10),(11,12)>]
+	 * Here the entire arraylist is the one marked under [ and ]
+	 * Each entry in the arraylist marked under < and > and represents the edges of a specific type incident with the vertex
+	 * Each entry marked under ( and ) represents the actual edge numbers  
+	 * 
+	 */
+	public ArrayList<ArrayList<ArrayList<Integer>>> edgeList;
 	
 	
+	
+
 	/**
-	 * @return the label
+	 * @return the edges
 	 */
-	public String getLabel() {
-		return label;
+	public ArrayList<ArrayList<ArrayList<Integer>>> getEdgeList() {
+		return edgeList;
 	}
 
 
 	/**
-	 * @param label the label to set
+	 * @param edges the edges to set
 	 */
-	public void setLabel(String label) {
-		this.label = label;
-	}
-
-
-	/**
-	 * @return the id
-	 */
-	public int getId() {
-		return id;
-	}
-
-
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(int id) {
-		this.id = id;
+	public void setEdges(ArrayList<ArrayList<ArrayList<Integer>>> edgeList) {
+		this.edgeList = edgeList;
 	}
 
 

@@ -2,24 +2,44 @@ package com.gdb.query;
 
 import java.util.Map;
 
+/**
+ * This class contains each parsed entry from the query
+ * @author sysadmin
+ *
+ */
 public class QueryItem {
 
-	String vertexLabel;
+	/**
+	 * The vertex label specified in the query
+	 */
+	int vertexLabel;
+	/**
+	 * Attribute list for the vertex
+	 */
 	Map<String, Object> vertexAttributeMap;
+	/**
+	 * Direction of the edge
+	 */
 	Direction direction;
-	String edgeLabel;
+	/**
+	 * Edge label specified in the query
+	 */
+	int edgeLabel;
+	/**
+	 * Attribute list for the edge
+	 */
 	Map<String, Object> edgeAttributeMap;
 	
 	/**
 	 * @return the type
 	 */
-	public String getType() {
+	public int getType() {
 		return vertexLabel;
 	}
 	/**
 	 * @param type the type to set
 	 */
-	public void setType(String vertexLabel) {
+	public void setType(int vertexLabel) {
 		this.vertexLabel = vertexLabel;
 	}
 	
@@ -38,13 +58,13 @@ public class QueryItem {
 	/**
 	 * @return the edgeLabel
 	 */
-	public String getEdgeLabel() {
+	public int getEdgeLabel() {
 		return edgeLabel;
 	}
 	/**
 	 * @param edgeLabel the edgeLabel to set
 	 */
-	public void setEdgeLabel(String edgeLabel) {
+	public void setEdgeLabel(int edgeLabel) {
 		this.edgeLabel = edgeLabel;
 	}
 	/**

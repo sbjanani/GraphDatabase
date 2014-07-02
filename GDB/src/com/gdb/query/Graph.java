@@ -12,21 +12,36 @@ import java.util.Map;
  */
 public class Graph {
 
-	ArrayList<Integer> graphIndex;
+	/**
+	 *  This arraylist holds the main graph index. 
+	 *  Each entry in the graphIndex.idx file is mapped as one entry in the graphIndex arraylist.
+	 *  So, each vertex will have one entry and the id of the vertex = position of the vertex in the arraylist
+	 */
+	ArrayList<Index> graphIndex;
+	
+	/**
+	 * This map is a secondary index that groups the vertices by their type(label).
+	 * There will will 8 entries, one for each vertex label and value will be an arraylist of vertices belonging to that type
+	 */
 	Map<Integer, ArrayList<Integer>> typeIndex;
 	
-	// constructor for the graph
-	public Graph(){
+
+	/**
+	 * Constructor for the graph
+	 * It loads the graphIndex and typeIndex into memory
+	 * @param path = path where the the index files are located
+	 */
+	public Graph(String path){
 		
-		this.graphIndex = initializeGraphIndex("path");
-		this.typeIndex = initializeTypeIndex("path");
+		this.graphIndex = initializeGraphIndex(path);
+		this.typeIndex = initializeTypeIndex(path);
 	}
 	
 	
 	/**
 	 * @return the graphIndex
 	 */
-	public ArrayList<Integer> getGraphIndex() {
+	public ArrayList<Index> getGraphIndex() {
 		return graphIndex;
 	}
 
@@ -34,7 +49,7 @@ public class Graph {
 	 * This method initializes the graph index
 	 * @param path - path to graphIndex.idx 
 	 */
-	public ArrayList<Integer> initializeGraphIndex(String path) {
+	public ArrayList<Index> initializeGraphIndex(String path) {
 		
 
 
@@ -66,7 +81,7 @@ public class Graph {
 	 * @param labels - the label types that the vertex can belong to
 	 * @return - returns an ArrayList containing the vertex objects
 	 */
-	public ArrayList<Vertex> getVertices(String... labels){
+	public ArrayList<Vertex> getVertices(int... labels){
 		
 		return null;
 	}
@@ -78,7 +93,7 @@ public class Graph {
 	 * @param labels - the label types that the vertex can belong to
 	 * @return - returns an ArrayList containing the vertex objects
 	 */
-	public ArrayList<Vertex> getVertices(Map<String, Object> attributeMap, String... labels){
+	public ArrayList<Vertex> getVertices(Map<String, Object> attributeMap, int... labels){
 		
 		return null;
 	}
@@ -119,7 +134,7 @@ public class Graph {
 	 * @param label - label for the vertex
 	 * @param attributeMap - optional attributes for the vertex. Can be null.
 	 */
-	public void addVertex(String label, Map<String, Object> attributeMap){
+	public void addVertex(int label, Map<String, Object> attributeMap){
 		
 		
 	}
@@ -131,7 +146,7 @@ public class Graph {
 	 * @param tail - id of the tail vertex
 	 * @param attributeMap - optional attributes for the edge. Can be null.
 	 */
-	public void addEdge(String label, int head, int tail, Map<String, Object> attributeMap){
+	public void addEdge(int label, int head, int tail, Map<String, Object> attributeMap){
 		
 	}
 	
