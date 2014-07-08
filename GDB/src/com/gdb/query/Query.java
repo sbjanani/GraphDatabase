@@ -27,7 +27,7 @@ public class Query {
 	 * @param element - vertex/edge object with id
 	 * @return
 	 */
-	public Map<String, Object> getAttributes(Element... element){
+	public Map<String, Object> getAttributes(Element element){
 		
 		return null;
 	}
@@ -41,7 +41,7 @@ public class Query {
 	 * @param edgeLabels - optional list of vertex labels
 	 * @return
 	 */
-	public ArrayList<ArrayList<Element>> khopNeighborhood(Vertex vertex, int k, String... vertexLabels){
+	public ArrayList<ArrayList<Element>> khopNeighborhood(Vertex vertex, int k, String vertexLabels){
 		
 		return null;
 		

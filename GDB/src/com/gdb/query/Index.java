@@ -1,11 +1,30 @@
 package com.gdb.query;
 
+/**
+ * This class holds the index object for a vertex
+ * @author sysadmin
+ *
+ */
 public class Index {
 
+	/**
+	 * The vertex id 
+	 */
 	int vertexId;
-	int vertexType;
-	long edgeBitmap;
-	int[] edgeNums;
+	/**
+	 * The type of the vertex. 
+	 */
+	byte vertexType;
+	/**
+	 * The edge bitmap which specifies if there is an incoming/outgoing edge of each type
+	 * 2 bits per edge type(1 for incoming, 1 for outgoing) for a total of 8 types = 16 bits = short
+	 */
+	short edgeBitmap;
+	/**
+	 * array holding the number of edges incident with the vertex of a given type
+	 * The array length will be 8, one for each type 
+	 */
+	short[] edgeNums;
 	/**
 	 * @return the vertexId
 	 */
@@ -21,38 +40,46 @@ public class Index {
 	/**
 	 * @return the vertexType
 	 */
-	public int getVertexType() {
+	public byte getVertexType() {
 		return vertexType;
 	}
 	/**
 	 * @param vertexType the vertexType to set
 	 */
-	public void setVertexType(int vertexType) {
+	public void setVertexType(byte vertexType) {
 		this.vertexType = vertexType;
 	}
 	/**
 	 * @return the edgeBitmap
 	 */
-	public long getEdgeBitmap() {
+	public short getEdgeBitmap() {
 		return edgeBitmap;
 	}
 	/**
 	 * @param edgeBitmap the edgeBitmap to set
 	 */
-	public void setEdgeBitmap(long edgeBitmap) {
+	public void setEdgeBitmap(short edgeBitmap) {
 		this.edgeBitmap = edgeBitmap;
 	}
 	/**
 	 * @return the edgeNums
 	 */
-	public int[] getEdgeNums() {
+	public short[] getEdgeNums() {
 		return edgeNums;
 	}
 	/**
 	 * @param edgeNums the edgeNums to set
 	 */
-	public void setEdgeNums(int[] edgeNums) {
+	public void setEdgeNums(short[] edgeNums) {
 		this.edgeNums = edgeNums;
+	}
+	
+	public String toString(){
+		String s = "Vertex ID: "+vertexId+ " Vertex Type: "+vertexType+" BitMap: "+edgeBitmap+"\n";
+		for(int i = 0; i < 16; i++){
+			s += edgeNums[i]+":";
+		}
+		return s+"\n";
 	}
 	
 	

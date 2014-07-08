@@ -7,6 +7,8 @@ package com.gdb.query;
  */
 public enum Direction {
 	
-	// directions allowed
+	/** 
+	 * directions allowed
+	 */
 	IN, OUT, BOTH; 
 }

@@ -11,7 +11,10 @@ import com.gdb.query.QueryItem;
  */
 public class Parse {
 
-	public ArrayList<QueryItem> queryList;
+	/**
+	 * The arraylist containing the parsed query
+	 */
+	ArrayList<QueryItem> queryList;
 
 	/**
 	 * @return the queryList

@@ -2,53 +2,47 @@ package com.gdb.query;
 
 /**
  * This class contains methods to operate the edges
- * @author 
+ * @author
  *
  */
-/**
- * @author sysadmin
- *
- */
-public class Edge {
 
-	String label;
+public class Edge extends Element {
+
+	
+	/**
+	 * label of the head node
+	 */
 	int headNodeLabel;
+	/**
+	 * label of the tail node
+	 */
 	int tailNodeLabel;
+	/**
+	 * offset from the tail node to the head node
+	 */
 	int offset;
-	int id;
-	
-	
-	
-	
 	/**
-	 * @return the id
+	 * id of the node from which this edge object was created.
 	 */
-	public int getId() {
-		return id;
+	int nodeId;
+
+	
+
+	/**
+	 * @return the nodeId
+	 */
+	public int getNodeId() {
+		return nodeId;
 	}
 
 	/**
-	 * @param id the id to set
+	 * @param nodeId
+	 *            the nodeId to set
 	 */
-	public void setId(int id) {
-		this.id = id;
+	public void setNodeId(int nodeId) {
+		this.nodeId = nodeId;
 	}
 
-	/**
-	 * @return the label
-	 */
-	public String getLabel() {
-		return label;
-	}
-
-	/**
-	 * @param label- the label to set
-	 */
-	public void setLabel(String label) {
-		this.label = label;
-	}
-
-	
 	/**
 	 * @return the offset
 	 */
@@ -57,13 +51,12 @@ public class Edge {
 	}
 
 	/**
-	 * @param offset the offset to set
+	 * @param offset
+	 *            the offset to set
 	 */
 	public void setOffset(int offset) {
 		this.offset = offset;
 	}
-	
-	
 
 	/**
 	 * @return the headNodeType
@@ -73,7 +66,8 @@ public class Edge {
 	}
 
 	/**
-	 * @param headNodeType the headNodeType to set
+	 * @param headNodeType
+	 *            the headNodeType to set
 	 */
 	public void setHeadNodeLabel(int headNodeType) {
 		this.headNodeLabel = headNodeType;
@@ -87,39 +81,50 @@ public class Edge {
 	}
 
 	/**
-	 * @param tailNodeType the tailNodeType to set
+	 * @param tailNodeType
+	 *            the tailNodeType to set
 	 */
 	public void setTailNodeLabel(int tailNodeType) {
 		this.tailNodeLabel = tailNodeType;
 	}
 
 	/**
-	 * This method returns the tail/out or head/in vertex. 
-	 * Throws IllegalArgumentException if BOTH is provided in Direction
-	 * @param direction - tail/out or head/in vertex. 
-	 * @return - returns the tail/out or head/in vertex. 
+	 * This method returns the tail/out or head/in vertex. Throws
+	 * IllegalArgumentException if BOTH is provided in Direction
+	 * 
+	 * @param direction
+	 *            - tail/out or head/in vertex.
+	 * @return - returns the tail/out or head/in vertex.
 	 */
+
 	public Vertex getVertex(Direction direction) throws IllegalArgumentException{
-		if(direction.equals(Direction.BOTH))
+		/*if(direction.equals(Direction.BOTH))
 			throw new IllegalArgumentException("Direction cannot be BOTH");
 		Vertex v = new Vertex();
 		if(direction.equals(Direction.OUT))
 			v.setId(tailNodeLabel);
 		else
-			v.setId(headNodeLabel);
-		return v;
-	}
+			v.setId(headNodeLabel);*/
+		return null;
+
 	
+
+	}
+
 	/**
-	 * This method returns the tail/out or head/in vertex satisfying the given label. 
-	 * Throws IllegalArgumentException if BOTH is provided in Direction
-	 *@param direction - tail/out or head/in vertex. 
-	 * @param label - the type of vertex to return
-	 * @return - returns the tail/out or head/in vertex of the type Label. 
+	 * This method returns the tail/out or head/in vertex satisfying the given
+	 * label. Throws IllegalArgumentException if BOTH is provided in Direction
+	 *
+	 * @param direction
+	 *            - tail/out or head/in vertex.
+	 * @param label
+	 *            - the type of vertex to return
+	 * @return - returns the tail/out or head/in vertex of the type Label.
 	 * @throws IllegalArgumentException
 	 */
-	public Vertex getVertex(Direction direction, String label) throws IllegalArgumentException{
-		
+	public Vertex getVertex(Direction direction, int label)
+			throws IllegalArgumentException {
+
 		return null;
 	}
 }

@@ -10,20 +10,36 @@ import java.util.Map;
  * @author 
  *
  */
-/**
- * @author sysadmin
- *
- */
+
 public class Element {
+	
+	/**
+	 * id of the element
+	 */
+	int id;
+	/**
+	 * label of the element
+	 */
+	int label;
 
 	/**
 	 * This method returns the absolute id of the element
 	 * @return returns the id of the element (both Vertex and Edge)
 	 */
 	public int getId(){
-		
-		
-		return 0;
+		return id;
+	}
+	
+	public void setId(int i){
+		id = i;
+	}
+	
+	public int getLabel(){
+		return label;
+	}
+	
+	public void setLabel(int l){
+		label = l;
 	}
 	
 	/**

@@ -75,9 +75,9 @@ public class NodesTester {
 	}
 	
 	public static void main(String[] args) throws IOException{
-		RandomAccessFile nFile = new RandomAccessFile("/Users/Naveen/DB1/nodes.dat","rw");
-		RandomAccessFile iFile = new RandomAccessFile("/Users/Naveen/DB1/graph.idx","rw");
-		RandomAccessFile oFile = new RandomAccessFile("/Users/Naveen/DB1/overFlow.dat","rw");
+		RandomAccessFile nFile = new RandomAccessFile("/Users/Naveen/DB400Nodes/nodes.dat","rw");
+		RandomAccessFile iFile = new RandomAccessFile("/Users/Naveen/DB400Nodes/graph.idx","rw");
+		RandomAccessFile oFile = new RandomAccessFile("/Users/Naveen/DB400Nodes/overFlow.dat","rw");
 		Scanner s = new Scanner(System.in);
 		System.out.println("Enter the number of the record you want to see or -1 to see the whole file: ");
 		int record = s.nextInt();
