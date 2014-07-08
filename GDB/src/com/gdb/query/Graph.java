@@ -212,6 +212,7 @@ System.out.println("OUTOING: "+outgoing);
 				}
 			}
 		}
+		eNum = 0;
 		for(int i = 1; i < graphIndex.get(id).edgeNums.length; i+=2){
 			if(graphIndex.get(id).edgeNums[i] > 0){
 				for(int k = 0; k < graphIndex.get(id).edgeNums[i]; k++){
@@ -270,7 +271,7 @@ System.out.println("OUTOING: "+outgoing);
 			numOutgoing += graphIndex.get(id).edgeNums[j];
 		if(numIncoming < 16){//add the outgoing edgeNumbers that fit in the regular space
 			nFile.seek(numIncoming*5+id*(Constants.MAX_EDGES_NODES_DAT*5+4));
-			for(int j = 0; j < Math.min(16,numOutgoing+numIncoming); j++){
+			for(int j = 0; j < Math.min(16-numIncoming,numOutgoing+numIncoming); j++){
 				nFile.readByte();
 				int edgeNumber = nFile.readInt();
 				result.add(edgeNumber);
@@ -278,10 +279,14 @@ System.out.println("OUTOING: "+outgoing);
 		}
 		if(numIncoming + numOutgoing > 16){//add from overflow area
 			//COULD BE WRONG!!!
+			//System.out.println("POSITION: "+nFile.getFilePointer());
+			nFile.seek(Constants.MAX_EDGES_NODES_DAT*5+id*(Constants.MAX_EDGES_NODES_DAT*5+4));
 			int overFlowPointer = nFile.readInt();
-			System.out.println("OVERFLOW POINTER: "+overFlowPointer);
-			oFile.seek(overFlowPointer);
-			for(int i = 0; i < (numIncoming+numOutgoing)-16; i++){
+			//System.out.println("OVERFLOW POINTER: "+overFlowPointer);
+			int offset = (numIncoming < 16) ? overFlowPointer : overFlowPointer+(numIncoming-16)*5;
+			oFile.seek(offset);
+			int numToRead = (numIncoming < 16) ? numOutgoing - 16 + numIncoming : numOutgoing;
+			for(int i = 0; i < numToRead; i++){
 				oFile.readByte();
 				int edgeNumber = oFile.readInt();
 				result.add(edgeNumber);
@@ -305,8 +310,9 @@ System.out.println("OUTOING: "+outgoing);
 		}
 		if(numEdges > 16){
 			//COULD BE WRONG!!!
+			//System.out.println("POSITION: "+nFile.getFilePointer());
 			int overFlowPointer = nFile.readInt();
-			System.out.println("OVERFLOW POINTER IN: "+overFlowPointer);
+			//System.out.println("OVERFLOW POINTER IN: "+overFlowPointer);
 			oFile.seek(overFlowPointer);
 			for(int i = 0; i < numEdges-16; i++){
 				oFile.readByte();
