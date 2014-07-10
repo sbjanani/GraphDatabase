@@ -7,15 +7,7 @@ import java.util.Scanner;
 public class NodesTester {
 	
 	private static int bytesToInt(byte b3, byte b2, byte b1, byte b0){
-		//return (int)(Math.pow(2,24)*b3 + Math.pow(2,16)*b2 + Math.pow(2,8)*b1 + b0);
-		int result = b3;
-		result = result<<8;
-		result += b2;
-		result = result<<8;
-		result += b1;
-		result = result<<8;
-		result += b0;
-		return result;
+		return b3 << 24 | (b2 & 0xff) << 16 | (b1 & 0xff) << 8 | (b0 & 0xff);
 	}
 	
 	private static byte[] intToBytes(int num){
@@ -34,8 +26,8 @@ public class NodesTester {
 		for(int i = 3; i < iBuffer.length; i+=2)
 			numEdges += iBuffer[i]*256 + iBuffer[i+1];
 		System.out.println("Node type: "+iBuffer[0]);
-		System.out.println("Incoming edge bitmap "+iBuffer[1]);
-		System.out.println("Outgoing edge bitmap "+iBuffer[2]);
+		System.out.printf("Incoming edge bitmap %02X\n",iBuffer[1]);
+		System.out.printf("Outgoing edge bitmap %02X\n",iBuffer[2]);
 		System.out.println("NUM EDGES: "+numEdges);
 		System.out.println("incoming/outgoing counts");
 		for(int j = 0; j < 8; j++){
@@ -55,12 +47,13 @@ public class NodesTester {
 				System.out.print("InComing ");
 			else
 				System.out.print("OutGoing ");
+			
 			System.out.println(bytesToInt(buffer[5*i+1],buffer[5*i+2],buffer[5*i+3],buffer[5*i+4]));	
 		}
 		
 		if(numEdges > 16){
 			byte [] oBuffer = new byte[5*(numEdges - 16)];
-			int pointer = bytesToInt(buffer[83],buffer[82],buffer[81],buffer[80]);
+			int pointer = bytesToInt(buffer[80],buffer[81],buffer[82],buffer[83]);
 		    System.out.println("POINTER: "+pointer);
 		    oFile.seek(pointer);
 		    oFile.read(oBuffer);

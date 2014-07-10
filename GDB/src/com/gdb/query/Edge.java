@@ -27,18 +27,28 @@ public class Edge extends Element {
 	/**
 	 * id of the node from which this edge object was created.
 	 */
-	int nodeId;
+	int tailNodeId;
+	
+	int headNodeId;
+	
+	
+	Graph g;//graph in which the edge belongs to
 	
 	String dbPath;
 	
 	//go to the correct edge and initialize all of the fields
-	public Edge(int nodeId, String path) throws IOException{
+	public Edge(int nodeId,int edgeNumber,Graph graph, String path) throws IOException{
 		dbPath = path;
+		g = graph;
+		this.tailNodeId = nodeId;
+		id = edgeNumber;
 		RandomAccessFile eFile = new RandomAccessFile(path+"edges.dat","rw");
-		eFile.seek(nodeId*6);
+		//seek to the point in the edges file where the edgeId information is stored
+		eFile.seek(id*6);
 		headNodeLabel = eFile.readByte();
 		tailNodeLabel = eFile.readByte();
 		offset = eFile.readInt();
+		headNodeId = offset + tailNodeId;
 		eFile.close();
 	}
 	
@@ -46,7 +56,7 @@ public class Edge extends Element {
 	 * @return the nodeId
 	 */
 	public int getNodeId() {
-		return nodeId;
+		return tailNodeId;
 	}
 
 	/**
@@ -54,7 +64,7 @@ public class Edge extends Element {
 	 *            the nodeId to set
 	 */
 	public void setNodeId(int nodeId) {
-		this.nodeId = nodeId;
+		this.tailNodeId = nodeId;
 	}
 
 	/**
@@ -109,16 +119,17 @@ public class Edge extends Element {
 	 * @param direction
 	 *            - tail/out or head/in vertex.
 	 * @return - returns the tail/out or head/in vertex.
+	 * @throws IOException 
 	 */
 
-	public Vertex getVertex(Direction direction) throws IllegalArgumentException{
+	public Vertex getVertex(Direction direction) throws IllegalArgumentException, IOException{
 		if(direction.equals(Direction.BOTH))
 			throw new IllegalArgumentException("Direction cannot be BOTH");
-		Vertex v = new Vertex();
+		Vertex v = null;
 		if(direction.equals(Direction.OUT))
-			v.setId(tailNodeLabel);
+			v = g.getVertex(tailNodeId);
 		else
-			v.setId(headNodeLabel);
+			v = g.getVertex(headNodeId);
 		return v;
 	}
 
@@ -132,12 +143,19 @@ public class Edge extends Element {
 	 *            - the type of vertex to return
 	 * @return - returns the tail/out or head/in vertex of the type Label.
 	 * @throws IllegalArgumentException
+	 * @throws IOException 
 	 */
 	public Vertex getVertex(Direction direction, int label)
-			throws IllegalArgumentException {
+			throws IllegalArgumentException, IOException {
 		if(direction.equals(Direction.BOTH))
 			throw new IllegalArgumentException("Direction cannot be BOTH");
-		
-		return null;
+		Vertex v = null;	
+		if(direction.equals(Direction.OUT) && tailNodeLabel == label)
+			v = g.getVertex(tailNodeId);
+		else if(direction.equals(Direction.IN) && headNodeLabel == label)
+			v = g.getVertex(headNodeId);
+		else
+			return null;
+		return v;
 	}
 }

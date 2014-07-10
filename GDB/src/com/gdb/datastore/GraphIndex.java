@@ -1,3 +1,4 @@
+package com.gdb.datastore;
 /**
  * This file populates the "graph.idx" file
  * @author janani
@@ -107,123 +108,117 @@ public class GraphIndex {
         }
 
         public void writeNodesAndEdgesOld(String path, ArrayList<AdjacencyRecord> edgeArray) throws IOException{
-                RandomAccessFile nFile = new RandomAccessFile(path+"/nodes.dat","rw");
-                RandomAccessFile eFile = new RandomAccessFile(path+"/edges.dat","rw");
-                RandomAccessFile oFile = new RandomAccessFile(path+"/overFlow.dat","rw");
-                //CHANGED
-                Integer newEdgeNumber = 0;
-                int overFlowCounter = 0;
+        	RandomAccessFile nFile = new RandomAccessFile(path+"/nodes.dat","rw");
+       	 	RandomAccessFile eFile = new RandomAccessFile(path+"/edges.dat","rw");
+       	 	RandomAccessFile oFile = new RandomAccessFile(path+"/overFlow.dat","rw");
+       	 	//CHANGED
+       	 	Integer newEdgeNumber = 0;
+       	 	int overFlowCounter = 0;
             for(int i = 0; i < edgeArray.size(); i++){
-                //CHANGED
-                Integer overFlowBufferIndex = 0;
-                System.out.println("I= "+i);
-                byte[] nBuffer = new byte[4 + 5*Constants.MAX_EDGES_NODES_DAT];
-                byte[] eBuffer = new byte[Constants.EDGE_DAT_SIZE];
-                ArrayList<NeighborNodeRecord> incoming = edgeArray.get(i).getInComing();
-                ArrayList<NeighborNodeRecord> outgoing = edgeArray.get(i).getOutGoing();
-                int size = incoming.size() + outgoing.size() - Constants.MAX_EDGES_NODES_DAT;
-                byte[] oBuffer = null;
-                if(size > 0)
-                    oBuffer = new byte[5*size];
-                //CHANGED
-                Integer neighborCount = -1;
-                //Integer eNumber = 0;
-                for(int in = 0; in < incoming.size(); in++){
-                    int eNumber = 0;
-                    neighborCount++;
-                    if(i < incoming.get(in).neighborNode){
-                        eNumber = newEdgeNumber;
-                        incoming.get(in).edgeNumber = eNumber;
-                        setEdgeNumberOutGoing(edgeArray,i,incoming.get(in).neighborNode,eNumber);
-                        int offSet = incoming.get(in).neighborNode -i;
-                        eBuffer[0] = nodeTypes[i];
-                        eBuffer[1] = nodeTypes[incoming.get(in).neighborNode];
-                        eBuffer[2] = (byte)(offSet>>>24);
-                        eBuffer[3] = (byte)(offSet>>>16);
-                        eBuffer[4] = (byte)(offSet>>>8);
-                        eBuffer[5] = (byte)(offSet);
-                        eFile.write(eBuffer);
-                        newEdgeNumber++;
-                    }
-                    else{
-                        eNumber = getOutGoingEdgeNumber(i,incoming.get(in).neighborNode,edgeArray);
-                    }
-                    if(neighborCount < Constants.MAX_EDGES_NODES_DAT){
-                        nBuffer[5*in] = 0;
-                        nBuffer[5*in+1] = (byte)(eNumber>>>24);
-                        nBuffer[5*in+2] = (byte)(eNumber>>>16);
-                        nBuffer[5*in+3] = (byte)(eNumber>>>8);
-                        nBuffer[5*in+4] = (byte)eNumber;
-                    }
-                    else{
-                        oBuffer[overFlowBufferIndex++] = 0;
-                        oBuffer[overFlowBufferIndex++] = (byte)(eNumber>>>24);
-                        oBuffer[overFlowBufferIndex++] = (byte)(eNumber>>>16);
-                        oBuffer[overFlowBufferIndex++] = (byte)(eNumber>>>8);
-                        oBuffer[overFlowBufferIndex++] = (byte)eNumber;
-                    }
-                }
-                for(int out = 0; out < outgoing.size(); out++){
-                    int eNumber = 0;
-                    neighborCount++;
-                    if(i < outgoing.get(out).neighborNode){
-                        eNumber = newEdgeNumber;
-                        outgoing.get(out).edgeNumber = eNumber;
-                        setEdgeNumberIncoming(edgeArray,i,outgoing.get(out).neighborNode,eNumber);
-                        int offSet =  i - outgoing.get(out).neighborNode;
-                        eBuffer[0] = nodeTypes[outgoing.get(out).neighborNode];
-                        eBuffer[1] = nodeTypes[i];
-                        eBuffer[2] = (byte)(offSet>>>24);
-                        eBuffer[3] = (byte)(offSet>>>16);
-                        eBuffer[4] = (byte)(offSet>>>8);
-                        eBuffer[5] = (byte)(offSet);
-                        eFile.write(eBuffer);
-                        newEdgeNumber++;
-                    }
-                    else
-                        eNumber = getIncomingEdgeNumber(i,outgoing.get(out).neighborNode,edgeArray);
-                    if(neighborCount < Constants.MAX_EDGES_NODES_DAT){
-                        nBuffer[5*(out+incoming.size())] = 1;
-                        nBuffer[5*(out+incoming.size())+1] = (byte)(eNumber>>>24);
-                        nBuffer[5*(out+incoming.size())+2] = (byte)(eNumber>>>16);
-                        nBuffer[5*(out+incoming.size())+3] = (byte)(eNumber>>>8);
-                        nBuffer[5*(out+incoming.size())+4] = (byte)eNumber;
-                    }
-                    else{
-                        oBuffer[overFlowBufferIndex++] = 1;
-                        oBuffer[overFlowBufferIndex++] = (byte)(eNumber>>>24);
-                        oBuffer[overFlowBufferIndex++] = (byte)(eNumber>>>16);
-                        oBuffer[overFlowBufferIndex++] = (byte)(eNumber>>>8);
-                        oBuffer[overFlowBufferIndex++] = (byte)eNumber;
-                    }
-                }
-                //processIncoming(i,edgeArray,incoming,eBuffer,nBuffer,oBuffer,eFile,
-                    //        newEdgeNumber,overFlowBufferIndex);
-                //processOutgoing(i,edgeArray,outgoing,incoming,eBuffer,nBuffer,oBuffer,eFile,
-                   //     newEdgeNumber,overFlowBufferIndex);
-                if(size > 0) {
-                    nBuffer[5*Constants.MAX_EDGES_NODES_DAT] = (byte)(overFlowCounter>>>24);
-                    nBuffer[5*Constants.MAX_EDGES_NODES_DAT+1] = (byte)(overFlowCounter>>>16);
-                    nBuffer[5*Constants.MAX_EDGES_NODES_DAT+2] = (byte)(overFlowCounter>>>8);
-                    nBuffer[5*Constants.MAX_EDGES_NODES_DAT+3] = (byte)(overFlowCounter);
-                    overFlowCounter += 5*size;
-                }
-                else {
-                    int largestInt = -1;
-                    nBuffer[5*Constants.MAX_EDGES_NODES_DAT] = (byte)(largestInt>>>24);
-                    nBuffer[5*Constants.MAX_EDGES_NODES_DAT+1] = (byte)(largestInt>>>16);
-                    nBuffer[5*Constants.MAX_EDGES_NODES_DAT+2] = (byte)(largestInt>>>8);
-                    nBuffer[5*Constants.MAX_EDGES_NODES_DAT+3] = (byte)(largestInt);
-                }
-
-                nFile.write(nBuffer);
-                if(oBuffer != null)
-                    oFile.write(oBuffer);
+            	//CHANGED
+            	Integer overFlowBufferIndex = 0;
+            	System.out.println("I= "+i);
+            	byte[] nBuffer = new byte[4 + 5*Constants.MAX_EDGES_NODES_DAT];
+            	byte[] eBuffer = new byte[Constants.EDGE_DAT_SIZE];
+            	ArrayList<NeighborNodeRecord> incoming = edgeArray.get(i).getInComing();
+            	ArrayList<NeighborNodeRecord> outgoing = edgeArray.get(i).getOutGoing();
+            	int size = incoming.size() + outgoing.size() - Constants.MAX_EDGES_NODES_DAT;
+            	byte[] oBuffer = null;
+            	if(size > 0)
+            		oBuffer = new byte[5*size];
+            	//CHANGED
+            	Integer neighborCount = -1;
+            	//Integer eNumber = 0;
+            	for(int in = 0; in < incoming.size(); in++){
+            		int eNumber = 0;
+            		neighborCount++;
+            		if(i < incoming.get(in).neighborNode){
+            			eNumber = newEdgeNumber;
+            			incoming.get(in).edgeNumber = eNumber;
+            			setEdgeNumberOutGoing(edgeArray,i,incoming.get(in).neighborNode,eNumber);
+            			int offSet = incoming.get(in).neighborNode -i;
+                		eBuffer[0] = nodeTypes[i];
+                		eBuffer[1] = nodeTypes[incoming.get(in).neighborNode];
+                		eBuffer[2] = (byte)(offSet>>>24);
+                		eBuffer[3] = (byte)(offSet>>>16);
+                		eBuffer[4] = (byte)(offSet>>>8);
+                		eBuffer[5] = (byte)(offSet);
+                		eFile.write(eBuffer);
+            			newEdgeNumber++;
+            		}
+            		else{
+            			eNumber = getOutGoingEdgeNumber(i,incoming.get(in).neighborNode,edgeArray);
+            		}
+            		if(neighborCount < Constants.MAX_EDGES_NODES_DAT){
+            			nBuffer[5*in] = 0;
+            			nBuffer[5*in+1] = (byte)(eNumber>>>24);
+            			nBuffer[5*in+2] = (byte)(eNumber>>>16);
+            			nBuffer[5*in+3] = (byte)(eNumber>>>8);
+            			nBuffer[5*in+4] = (byte)eNumber;
+            		}
+            		else{
+            			oBuffer[overFlowBufferIndex++] = 0;
+            			oBuffer[overFlowBufferIndex++] = (byte)(eNumber>>>24);
+            			oBuffer[overFlowBufferIndex++] = (byte)(eNumber>>>16);
+            			oBuffer[overFlowBufferIndex++] = (byte)(eNumber>>>8);
+            			oBuffer[overFlowBufferIndex++] = (byte)eNumber;
+            		}
+            	}
+            	for(int out = 0; out < outgoing.size(); out++){
+            		int eNumber = 0;
+            		neighborCount++;
+            		if(i < outgoing.get(out).neighborNode){
+            			eNumber = newEdgeNumber;
+            			outgoing.get(out).edgeNumber = eNumber;
+            			setEdgeNumberIncoming(edgeArray,i,outgoing.get(out).neighborNode,eNumber);
+            			int offSet =  i - outgoing.get(out).neighborNode;
+                		eBuffer[0] = nodeTypes[outgoing.get(out).neighborNode];
+                		eBuffer[1] = nodeTypes[i];
+                		eBuffer[2] = (byte)(offSet>>>24);
+                		eBuffer[3] = (byte)(offSet>>>16);
+                		eBuffer[4] = (byte)(offSet>>>8);
+                		eBuffer[5] = (byte)(offSet);
+                		eFile.write(eBuffer);
+            			newEdgeNumber++;
+            		}
+            		else
+            			eNumber = getIncomingEdgeNumber(i,outgoing.get(out).neighborNode,edgeArray);
+            		if(neighborCount < Constants.MAX_EDGES_NODES_DAT){
+            			nBuffer[5*(out+incoming.size())] = 1;
+            			nBuffer[5*(out+incoming.size())+1] = (byte)(eNumber>>>24);
+            			nBuffer[5*(out+incoming.size())+2] = (byte)(eNumber>>>16);
+            			nBuffer[5*(out+incoming.size())+3] = (byte)(eNumber>>>8);
+            			nBuffer[5*(out+incoming.size())+4] = (byte)eNumber;
+            		}
+            		else{
+            			oBuffer[overFlowBufferIndex++] = 1;
+            			oBuffer[overFlowBufferIndex++] = (byte)(eNumber>>>24);
+            			oBuffer[overFlowBufferIndex++] = (byte)(eNumber>>>16);
+            			oBuffer[overFlowBufferIndex++] = (byte)(eNumber>>>8);
+            			oBuffer[overFlowBufferIndex++] = (byte)eNumber;
+            		}
+            	}
+            	//processIncoming(i,edgeArray,incoming,eBuffer,nBuffer,oBuffer,eFile,
+            		//        newEdgeNumber,overFlowBufferIndex);
+            	//processOutgoing(i,edgeArray,outgoing,incoming,eBuffer,nBuffer,oBuffer,eFile,
+    			   //     newEdgeNumber,overFlowBufferIndex);
+            	nBuffer[5*Constants.MAX_EDGES_NODES_DAT] = (byte)(overFlowCounter>>>24);
+    			nBuffer[5*Constants.MAX_EDGES_NODES_DAT+1] = (byte)(overFlowCounter>>>16);
+    			nBuffer[5*Constants.MAX_EDGES_NODES_DAT+2] = (byte)(overFlowCounter>>>8);
+    			nBuffer[5*Constants.MAX_EDGES_NODES_DAT+3] = (byte)(overFlowCounter);
+    			
+    			if(size > 0)
+            		overFlowCounter += 5*size; 
+    			
+    			nFile.write(nBuffer);
+    			if(oBuffer != null)
+    				oFile.write(oBuffer);
             }
             nFile.close();
             eFile.close();
             oFile.close();
         }
+
 
         public void writeNodesAndEdges(String path, ArrayList<AdjacencyRecord> edgeArray) throws IOException{
                 RandomAccessFile nFile = new RandomAccessFile(path+"/nodes.dat","rw");
@@ -266,6 +261,9 @@ public class GraphIndex {
                 if(oBuffer != null)
                     oFile.write(oBuffer);
             }
+            for(int i = 0; i < edgeArray.get(8).inComing.size(); i++){
+        		System.out.println("INCOMING ARRAY: "+edgeArray.get(8).inComing.get(i));
+        	}
             nFile.close();
             eFile.close();
             oFile.close();
