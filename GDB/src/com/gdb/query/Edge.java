@@ -21,9 +21,7 @@ public class Edge extends Element {
 	 */
 	int tailNodeLabel;
 	/**
-	 * offset from the tail node to the head node
-	 */
-	int offset;
+
 	/**
 	 * id of the node from which this edge object was created.
 	 */
@@ -32,23 +30,20 @@ public class Edge extends Element {
 	int headNodeId;
 	
 	
-	Graph g;//graph in which the edge belongs to
 	
-	String dbPath;
-	
-	//go to the correct edge and initialize all of the fields
-	public Edge(int nodeId,int edgeNumber,Graph graph, String path) throws IOException{
-		dbPath = path;
-		g = graph;
+	//go to the correct edge and initialize all of the fields,nodeId is tail node
+	public Edge(int nodeId,int edgeNumber,Graph g) throws IOException{
+		graph = g;
 		this.tailNodeId = nodeId;
 		id = edgeNumber;
-		RandomAccessFile eFile = new RandomAccessFile(path+"edges.dat","rw");
+		RandomAccessFile eFile = new RandomAccessFile(g.dbPath+"edges.dat","r");
 		//seek to the point in the edges file where the edgeId information is stored
-		eFile.seek(id*6);
-		headNodeLabel = eFile.readByte();
-		tailNodeLabel = eFile.readByte();
-		offset = eFile.readInt();
-		headNodeId = offset + tailNodeId;
+		eFile.seek(id*Constants.EDGE_DAT_SIZE);
+		label = eFile.readByte();
+		eFile.readInt();
+		headNodeId = eFile.readInt();
+		tailNodeLabel = g.graphIndex.get(tailNodeId).getVertexType();
+		headNodeLabel = g.graphIndex.get(headNodeId).getVertexType();
 		eFile.close();
 	}
 	
@@ -65,21 +60,6 @@ public class Edge extends Element {
 	 */
 	public void setNodeId(int nodeId) {
 		this.tailNodeId = nodeId;
-	}
-
-	/**
-	 * @return the offset
-	 */
-	public int getOffset() {
-		return offset;
-	}
-
-	/**
-	 * @param offset
-	 *            the offset to set
-	 */
-	public void setOffset(int offset) {
-		this.offset = offset;
 	}
 
 	/**
@@ -127,9 +107,9 @@ public class Edge extends Element {
 			throw new IllegalArgumentException("Direction cannot be BOTH");
 		Vertex v = null;
 		if(direction.equals(Direction.OUT))
-			v = g.getVertex(tailNodeId);
+			v = graph.getVertex(tailNodeId);
 		else
-			v = g.getVertex(headNodeId);
+			v = graph.getVertex(headNodeId);
 		return v;
 	}
 
@@ -151,11 +131,15 @@ public class Edge extends Element {
 			throw new IllegalArgumentException("Direction cannot be BOTH");
 		Vertex v = null;	
 		if(direction.equals(Direction.OUT) && tailNodeLabel == label)
-			v = g.getVertex(tailNodeId);
+			v = graph.getVertex(tailNodeId);
 		else if(direction.equals(Direction.IN) && headNodeLabel == label)
-			v = g.getVertex(headNodeId);
+			v = graph.getVertex(headNodeId);
 		else
 			return null;
 		return v;
+	}
+	
+	public String toString(){
+		return "Edge Id: "+id;
 	}
 }

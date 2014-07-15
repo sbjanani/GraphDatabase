@@ -21,6 +21,8 @@ public class Element {
 	 * label of the element
 	 */
 	int label;
+	
+	Graph graph;
 
 	/**
 	 * This method returns the absolute id of the element

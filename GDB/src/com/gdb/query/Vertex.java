@@ -1,5 +1,7 @@
 package com.gdb.query;
 
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -51,8 +53,9 @@ public class Vertex extends Element{
 	 * @param direction - IN/OUT/BOTH edge
 	 * @param labels - label for the edge
 	 * @return - returns an ArrayList containing the Edge objects
+	 * @throws IOException 
 	 */
-	public ArrayList<Edge> getEdges(Direction direction, String... labels){
+	public ArrayList<Edge> getEdges(Direction direction, String labels) throws IOException{
 		
 		return null;
 	}
@@ -62,10 +65,61 @@ public class Vertex extends Element{
 	 * This method returns all the edges of a given direction connected to a vertex
 	 * @param direction - IN/OUT/BOTH
 	 * @return - returns an ArrayList containing the Edge objects
+	 * @throws IOException 
 	 */
-	public ArrayList<Edge> getEdges(Direction direction){
-		
-		return null;
+	public ArrayList<Edge> getEdges(Direction direction) throws IOException{
+		//dbPath = path;
+		ArrayList<Edge> result = new ArrayList<Edge>();
+		RandomAccessFile nFile = new RandomAccessFile(graph.dbPath+"nodes.dat","rw");
+		RandomAccessFile oFile = new RandomAccessFile(graph.dbPath+"overFlow.dat","rw");
+		int numIncoming = graph.getNumIncoming(id);
+		int numOutgoing = graph.getNumOutGoing(id);
+		nFile.seek(id*84);
+		if(direction.equals(Direction.OUT)){
+			if(numIncoming < 16){//add the outgoing edgeNumbers that fit in the regular space
+				nFile.seek(numIncoming*5+id*(Constants.MAX_EDGES_NODES_DAT*5+4));
+				for(int j = 0; j < Math.min(16-numIncoming,numOutgoing); j++){
+					nFile.readByte();
+					int edgeNumber = nFile.readInt();
+					Edge e = new Edge(id,edgeNumber,graph);
+					result.add(e);
+				}
+			}
+			if(numIncoming + numOutgoing > 16){//add from overflow area
+				nFile.seek(Constants.MAX_EDGES_NODES_DAT*5+id*(Constants.MAX_EDGES_NODES_DAT*5+4));
+				int overFlowPointer = nFile.readInt();
+				int offset = (numIncoming < 16) ? overFlowPointer : overFlowPointer+(numIncoming-16)*5;
+				oFile.seek(offset);
+				int numToRead = (numIncoming < 16) ? numOutgoing - 16 + numIncoming : numOutgoing;
+				for(int i = 0; i < numToRead; i++){
+					oFile.readByte();
+					int edgeNumber = oFile.readInt();
+					Edge e = new Edge(id,edgeNumber,graph);
+					result.add(e);
+				}
+			}
+		}//end of outoing if
+		else{
+			for(int j = 0; j < Math.min(16,numIncoming); j++){
+				nFile.readByte();
+				int edgeNumber = nFile.readInt();
+				Edge e = new Edge(id,edgeNumber,graph);
+				result.add(e);
+			}
+			if(numIncoming > 16){
+				int overFlowPointer = nFile.readInt();
+				oFile.seek(overFlowPointer);
+				for(int i = 0; i < numIncoming-16; i++){
+					oFile.readByte();
+					int edgeNumber = oFile.readInt();
+					Edge e = new Edge(id,edgeNumber,graph);
+					result.add(e);
+				}
+			}
+		}//end of incoming else
+		nFile.close();
+		oFile.close();
+		return result;
 	}
 	
 	/**
@@ -81,6 +135,11 @@ public class Vertex extends Element{
 	}
 	
 	public String toString(){
-		return "Vertex id: "+id+" Vertex label: "+label+"\n"; 
+		return "Vertex id: "+id+" Vertex label: "+label+"\n"+"EDGE LIST: "+edgeList; 
+	}
+
+
+	public void setGraph(Graph g) {
+		graph  = g;	
 	}
 }

@@ -109,7 +109,7 @@ public class Graph {
 	 */
 	public Map<Integer, ArrayList<Integer>> initializeTypeIndex(String path) {
 		Map<Integer,ArrayList<Integer>> result = new HashMap<Integer,ArrayList<Integer>>();
-		for(int i = 0; i < 8; i++){
+		for(int i = 0; i < Constants.NUMBER_OF_NODE_TYPES; i++){
 			ArrayList<Integer> list = new ArrayList<Integer>();
 			for(int j = 0; j < graphIndex.size(); j++){
 				if(graphIndex.get(j).vertexType == i)
@@ -184,6 +184,7 @@ public class Graph {
 	public Vertex getVertex(int id) throws IOException{
 		Vertex v = new Vertex();
 		v.setId(id);
+		v.setGraph(this);
 		int l = getLabel(id);
 		v.setLabel(l);
 		ArrayList<ArrayList<ArrayList<Integer>>> edgeList = new ArrayList<ArrayList<ArrayList<Integer>>>();
@@ -195,32 +196,35 @@ public class Graph {
 			inOut.add(out);
 			edgeList.add(inOut);
 		}
-		RandomAccessFile nFile = new RandomAccessFile(dbPath+"nodes.dat","rw");
-		RandomAccessFile eFile = new RandomAccessFile(dbPath+"edges.dat","rw");
-		RandomAccessFile oFile = new RandomAccessFile(dbPath+"overFlow.dat","rw");
-		ArrayList<Integer> incoming = getIncomingNeighbors(nFile,eFile,oFile,id);
-		ArrayList<Integer> outgoing = getOutgoingNeighbors(nFile,eFile,oFile,id);
-System.out.println("INCOMING: "+incoming);
-System.out.println("OUTOING: "+outgoing);
-		int eNum = 0;
-		for(int i = 0; i < graphIndex.get(id).edgeNums.length; i+=2){
-			if(graphIndex.get(id).edgeNums[i] > 0){
-				for(int k = 0; k < graphIndex.get(id).edgeNums[i]; k++){
-					int node = getIncomingNeighborNode(eFile,incoming,id,eNum);
-					edgeList.get(Constants.NUMBER_OF_EDGE_TYPES-1-(i/2)).get(0).add(node);
-					eNum++;
-				}
-			}
+		RandomAccessFile nFile = new RandomAccessFile(dbPath+"nodes.dat","r");
+		RandomAccessFile eFile = new RandomAccessFile(dbPath+"edges.dat","r");
+		RandomAccessFile oFile = new RandomAccessFile(dbPath+"overFlow.dat","r");
+//System.out.println("ID ABOVE: "+id);
+	    //arraylists to hold the edge numbers for the node id passed in the method
+		ArrayList<Integer> incoming = getIncomingNeighbors(nFile,oFile,id);
+		ArrayList<Integer> outgoing = getOutgoingNeighbors(nFile,oFile,id);
+//System.out.println("INCOMING: "+incoming);
+//System.out.println("OUTOING: "+outgoing);
+//for(int x = 0; x < graphIndex.get(id).edgeNums.length; x++){
+	//System.out.print(graphIndex.get(id).edgeNums[x]+" ");
+//}
+//System.out.println();
+		//incoming edge nums
+		for(int i = 0; i < incoming.size(); i++){
+			int eNum = incoming.get(i);
+			eFile.seek(Constants.EDGE_DAT_SIZE*eNum);
+			int edgeType = eFile.readByte();
+			int fromNodeId = eFile.readInt();
+			edgeList.get(edgeType).get(0).add(fromNodeId);
 		}
-		eNum = 0;
-		for(int i = 1; i < graphIndex.get(id).edgeNums.length; i+=2){
-			if(graphIndex.get(id).edgeNums[i] > 0){
-				for(int k = 0; k < graphIndex.get(id).edgeNums[i]; k++){
-					int node = getOutgoingNeighborNode(eFile,outgoing,id,eNum);
-					edgeList.get(Constants.NUMBER_OF_EDGE_TYPES-1-((i-1)/2)).get(1).add(node);
-					eNum++;
-				}
-			}
+		//outgoing edge nums
+		for(int i = 0; i < outgoing.size(); i++){
+			int eNum = outgoing.get(i);
+			eFile.seek(Constants.EDGE_DAT_SIZE*eNum);
+			int edgeType = eFile.readByte();
+			eFile.readInt();
+			int toNodeId = eFile.readInt();
+			edgeList.get(edgeType).get(1).add(toNodeId);
 		}
 		nFile.close();
 		eFile.close();
@@ -243,24 +247,35 @@ System.out.println("OUTOING: "+outgoing);
 	private int getIncomingNeighborNode(RandomAccessFile eFile, ArrayList<Integer> incoming,
 			 int id, int eNum) throws IOException {
 		eFile.seek(Constants.EDGE_DAT_SIZE*incoming.get(eNum));
-		eFile.readByte();
-		eFile.readByte();
-		int offSet = eFile.readInt();
-		return offSet+id;
+		int fromNodeId = eFile.readInt();
+		return fromNodeId;
 	}
 	
 	private int getOutgoingNeighborNode(RandomAccessFile eFile,
 			ArrayList<Integer> outgoing, int id, int eNum) throws IOException {
 		eFile.seek(Constants.EDGE_DAT_SIZE*outgoing.get(eNum));
-		eFile.readByte();
-		eFile.readByte();
-		int offSet = eFile.readInt();
-		return id-offSet;
+		eFile.readInt();
+		int toNodeId = eFile.readInt();
+		return toNodeId;
+	}
+	
+	public int getNumIncoming(int nodeId){
+		int numIncoming = 0;
+		for(int i = 0; i < graphIndex.get(nodeId).edgeNums.length; i+=2)
+			numIncoming += graphIndex.get(nodeId).edgeNums[i];
+		return numIncoming;
+	}
+	
+	public int getNumOutGoing(int nodeId){
+		int numOutgoing = 0;
+		for(int j = 1; j < graphIndex.get(nodeId).edgeNums.length; j+=2)
+			numOutgoing += graphIndex.get(nodeId).edgeNums[j];
+		return numOutgoing;
 	}
 
 
 	private ArrayList<Integer> getOutgoingNeighbors(RandomAccessFile nFile,
-			RandomAccessFile eFile, RandomAccessFile oFile, int id) throws IOException {
+			 RandomAccessFile oFile, int id) throws IOException {
 		ArrayList<Integer> result = new ArrayList<Integer>();
 		int numIncoming = 0;
 		int numOutgoing = 0;
@@ -271,18 +286,15 @@ System.out.println("OUTOING: "+outgoing);
 			numOutgoing += graphIndex.get(id).edgeNums[j];
 		if(numIncoming < 16){//add the outgoing edgeNumbers that fit in the regular space
 			nFile.seek(numIncoming*5+id*(Constants.MAX_EDGES_NODES_DAT*5+4));
-			for(int j = 0; j < Math.min(16-numIncoming,numOutgoing+numIncoming); j++){
+			for(int j = 0; j < Math.min(16-numIncoming,numOutgoing); j++){
 				nFile.readByte();
 				int edgeNumber = nFile.readInt();
 				result.add(edgeNumber);
 			}
 		}
 		if(numIncoming + numOutgoing > 16){//add from overflow area
-			//COULD BE WRONG!!!
-			//System.out.println("POSITION: "+nFile.getFilePointer());
 			nFile.seek(Constants.MAX_EDGES_NODES_DAT*5+id*(Constants.MAX_EDGES_NODES_DAT*5+4));
 			int overFlowPointer = nFile.readInt();
-			//System.out.println("OVERFLOW POINTER: "+overFlowPointer);
 			int offset = (numIncoming < 16) ? overFlowPointer : overFlowPointer+(numIncoming-16)*5;
 			oFile.seek(offset);
 			int numToRead = (numIncoming < 16) ? numOutgoing - 16 + numIncoming : numOutgoing;
@@ -297,9 +309,10 @@ System.out.println("OUTOING: "+outgoing);
 
 
 	private ArrayList<Integer> getIncomingNeighbors(RandomAccessFile nFile,
-			RandomAccessFile eFile, RandomAccessFile oFile, int id) throws IOException {
+			RandomAccessFile oFile, int id) throws IOException {
 		ArrayList<Integer> result = new ArrayList<Integer>();
 		int numEdges = 0;
+//System.out.println("ID: "+id);
 		for(int i = 0; i < graphIndex.get(id).edgeNums.length; i+=2)
 			numEdges += graphIndex.get(id).edgeNums[i];
 		nFile.seek(id*(Constants.MAX_EDGES_NODES_DAT*5+4));
@@ -309,10 +322,7 @@ System.out.println("OUTOING: "+outgoing);
 			result.add(edgeNumber);
 		}
 		if(numEdges > 16){
-			//COULD BE WRONG!!!
-			//System.out.println("POSITION: "+nFile.getFilePointer());
 			int overFlowPointer = nFile.readInt();
-			//System.out.println("OVERFLOW POINTER IN: "+overFlowPointer);
 			oFile.seek(overFlowPointer);
 			for(int i = 0; i < numEdges-16; i++){
 				oFile.readByte();
