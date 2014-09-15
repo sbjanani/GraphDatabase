@@ -1,40 +1,46 @@
 package com.gdb.datastore;
 
-public class NeighborNodeRecord implements Comparable {
+public class NeighborNodeRecord  {
 	public int neighborNode;
-	public byte edgeType;
+	//public byte edgeType;
 	public int edgeNumber;
 	
-	public NeighborNodeRecord(int n, byte b) {
-		neighborNode = n;
-		edgeType = b;
-		edgeNumber = -1;
+	public NeighborNodeRecord(int nodeNumber, int edgeNumber) {
+		//neighborNode = n;
+		neighborNode = nodeNumber;
+		edgeNumber = edgeNumber;
 	}
 	
+
+	/**
+	 * @return the neighborNode
+	 */
 	public int getNeighborNode() {
 		return neighborNode;
 	}
-	
+
+	/**
+	 * @param neighborNode the neighborNode to set
+	 */
 	public void setNeighborNode(int neighborNode) {
 		this.neighborNode = neighborNode;
 	}
-	//change mades
-	public byte getEdgeType() {
-		return edgeType;
-	}
-	
-	public void setEdgeType(byte edgeType) {
-		this.edgeType = edgeType;
+
+	/**
+	 * @return the edgeNumber
+	 */
+	public int getEdgeNumber() {
+		return edgeNumber;
 	}
 
-	public int compareTo(Object arg0) {
-		NeighborNodeRecord n = (NeighborNodeRecord)(arg0);
-		return this.neighborNode - n.neighborNode;
+	/**
+	 * @param edgeNumber the edgeNumber to set
+	 */
+	public void setEdgeNumber(int edgeNumber) {
+		this.edgeNumber = edgeNumber;
 	}
+
 	
-	public String toString(){
-		return "["+neighborNode + ","+edgeType + ","+edgeNumber+"]";
-	}
 	
 	
 }

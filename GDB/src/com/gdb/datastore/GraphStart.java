@@ -15,8 +15,10 @@ public class GraphStart {
          * @throws IOException 
          */
         public static void main(String args[]) throws IOException{
-                GraphIndex gi = new GraphIndex("nodesInput.dat");
-                ArrayList<AdjacencyRecord> a = gi.readGraph("edgesInput.dat");
-                gi.writeGraph(args[0],a);
+                GraphIndex gi = new GraphIndex("/home/data/GDBData_small", "/home/data/gendataset");
+                gi.readNodes();
+                gi.readEdges();
+                //gi.displayAdjRecord();                
+                gi.writeGraph();
         }
 }

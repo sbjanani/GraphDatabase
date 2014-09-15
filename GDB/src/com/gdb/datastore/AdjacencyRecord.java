@@ -1,48 +1,72 @@
 package com.gdb.datastore;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class AdjacencyRecord {
-	ArrayList<NeighborNodeRecord> inComing;
-	ArrayList<NeighborNodeRecord> outGoing;
+	Map<Byte,ArrayList<NeighborNodeRecord>> inComing;
+	Map<Byte,ArrayList<NeighborNodeRecord>> outGoing;
+	short[] inComingCount;
+	short[] outGoingCount;
 	byte inComingEdgeBitMap;
 	byte outGoingEdgeBitMap;
 	
 	
 	
 	public AdjacencyRecord() {
-		inComing = new ArrayList<NeighborNodeRecord>();
-		outGoing = new ArrayList<NeighborNodeRecord>();
+		inComing = new HashMap<Byte,ArrayList<NeighborNodeRecord>>();
+		outGoing = new HashMap<Byte,ArrayList<NeighborNodeRecord>>();
+		inComingCount = new short[Constants.NUMBER_OF_EDGE_TYPES];
+		outGoingCount = new short[Constants.NUMBER_OF_EDGE_TYPES];
 		inComingEdgeBitMap = 0;
 		outGoingEdgeBitMap = 0;
 	}
 	
 	public short getIncomingCount(byte edgeType){
-		short result = 0;
-		for(int i = 0; i < inComing.size(); i++){
-			if(inComing.get(i).edgeType == edgeType)
-				result++;
-		}
-		return result;
+
+		
+		return (short) inComing.get(edgeType).size();
+			
 	}
 	
 	public short getOutGoingCount(byte edgeType){
-		short result = 0;
-		for(int i = 0; i < outGoing.size(); i++){
-			if(outGoing.get(i).edgeType == edgeType)
-				result++;
+		return (short) outGoing.get(edgeType).size();
+	}
+	
+	public void addIncoming(int value, byte edgeType, int edgeNumber){
+		
+		NeighborNodeRecord nr = new NeighborNodeRecord(value,edgeNumber);
+		
+		if(inComing.containsKey(edgeType)){
+			inComing.get(edgeType).add(nr);
+			
 		}
-		return result;
+		else{
+			ArrayList<NeighborNodeRecord> neighborList = new ArrayList<NeighborNodeRecord>();
+			neighborList.add(nr);	
+			inComing.put(edgeType, neighborList);
+		}
+		
+		
+		inComingCount[edgeType]++;
 	}
 	
-	public void addIncoming(int value, byte edgeType){
-		NeighborNodeRecord nr = new NeighborNodeRecord(value,edgeType);
-		inComing.add(nr);
-	}
-	
-	public void addOutGoing(int value,byte edgeType){
-		NeighborNodeRecord nr = new NeighborNodeRecord(value,edgeType);
-		outGoing.add(nr);
+	public void addOutGoing(int value,byte edgeType, int edgeNumber){
+		NeighborNodeRecord nr = new NeighborNodeRecord(value,edgeNumber);
+		
+		if(outGoing.containsKey(edgeType)){
+			outGoing.get(edgeType).add(nr);
+		}
+		else{
+			ArrayList<NeighborNodeRecord> neighborList = new ArrayList<NeighborNodeRecord>();
+			neighborList.add(nr);	
+			outGoing.put(edgeType, neighborList);
+		}
+		
+		
+		outGoingCount[edgeType]++;
 	}
 	
 	public void setInComingBit(int index){
@@ -53,19 +77,19 @@ public class AdjacencyRecord {
 		outGoingEdgeBitMap = (byte) (outGoingEdgeBitMap | (byte)(Math.pow(2,index)));
 	}
 
-	public ArrayList<NeighborNodeRecord> getInComing() {
+	public Map<Byte, ArrayList<NeighborNodeRecord>> getInComing() {
 		return inComing;
 	}
 	
-	public void setInComing(ArrayList<NeighborNodeRecord> inComing) {
+	public void setInComing(Map<Byte, ArrayList<NeighborNodeRecord>> inComing) {
 		this.inComing = inComing;
 	}
 	
-	public ArrayList<NeighborNodeRecord> getOutGoing() {
+	public Map<Byte, ArrayList<NeighborNodeRecord>> getOutGoing() {
 		return outGoing;
 	}
 	
-	public void setOutGoing(ArrayList<NeighborNodeRecord> outGoing) {
+	public void setOutGoing(Map<Byte, ArrayList<NeighborNodeRecord>> outGoing) {
 		this.outGoing = outGoing;
 	}
 	
@@ -87,6 +111,34 @@ public class AdjacencyRecord {
 	
 	public String toString(){
 		return "incoming = "+inComing + "\n" + "outoing= "+outGoing + "\n\n";
+	}
+	
+	/**
+	 * @return the inComingCount
+	 */
+	public short[] getInComingCount() {
+		return inComingCount;
+	}
+
+	/**
+	 * @param inComingCount the inComingCount to set
+	 */
+	public void setInComingCount(short[] inComingCount) {
+		this.inComingCount = inComingCount;
+	}
+
+	/**
+	 * @return the outGoingCount
+	 */
+	public short[] getOutGoingCount() {
+		return outGoingCount;
+	}
+
+	/**
+	 * @param outGoingCount the outGoingCount to set
+	 */
+	public void setOutGoingCount(short[] outGoingCount) {
+		this.outGoingCount = outGoingCount;
 	}
 	
 	
