@@ -125,10 +125,12 @@ public class GraphIndex {
        	 	RandomAccessFile eFile = new RandomAccessFile(destinationPath+"/edgefile.dat","rw");
        	      for(int node = 0; node < adjArray.size(); node++){
             	//System.out.println("I= "+node);
-            	byte[] nBuffer = new byte[5*Constants.MAX_EDGES_NODES_DAT];
+            	byte[] nBuffer = new byte[4*Constants.MAX_EDGES_NODES_DAT];
             	byte[] eBuffer = new byte[Constants.EDGE_DAT_SIZE];
             	Map<Byte,ArrayList<NeighborNodeRecord>> incoming = adjArray.get(node).getInComing();
             	Map<Byte,ArrayList<NeighborNodeRecord>> outgoing = adjArray.get(node).getOutGoing();
+            	
+            	int startBuffer = 0;
             	
             	for(Byte edgeType = 0; edgeType < Constants.NUMBER_OF_EDGE_TYPES; edgeType++){
             		
@@ -154,23 +156,24 @@ public class GraphIndex {
                         
                       System.out.println("edge : " + inNeighbor.getEdgeNumber()+" "+Arrays.toString(eBuffer));
                        
-                        
-                        nBuffer[5*inlist.indexOf(inNeighbor)] = 0;
-            			nBuffer[5*inlist.indexOf(inNeighbor)+1] = (byte)(inNeighbor.getEdgeNumber()>>>24);
-            			nBuffer[5*inlist.indexOf(inNeighbor)+2] = (byte)(inNeighbor.getEdgeNumber()>>>16);
-            			nBuffer[5*inlist.indexOf(inNeighbor)+3] = (byte)(inNeighbor.getEdgeNumber()>>>8);
-            			nBuffer[5*inlist.indexOf(inNeighbor)+4] = (byte)inNeighbor.getEdgeNumber();
+                        nBuffer[4*startBuffer] = (byte)(inNeighbor.getEdgeNumber()>>>24);
+            			nBuffer[4*startBuffer+1] = (byte)(inNeighbor.getEdgeNumber()>>>16);
+            			nBuffer[4*startBuffer+2] = (byte)(inNeighbor.getEdgeNumber()>>>8);
+            			nBuffer[4*startBuffer+3] = (byte)inNeighbor.getEdgeNumber();
+            			
+            			startBuffer++;
             			
             		}
+            		
             		
             		if(!(null == outlist))
             		for(NeighborNodeRecord outNeighbor : outlist){
          
-                        nBuffer[5*outlist.indexOf(outNeighbor)] = 1;
-            			nBuffer[5*outlist.indexOf(outNeighbor)+1] = (byte)(outNeighbor.getEdgeNumber()>>>24);
-            			nBuffer[5*outlist.indexOf(outNeighbor)+2] = (byte)(outNeighbor.getEdgeNumber()>>>16);
-            			nBuffer[5*outlist.indexOf(outNeighbor)+3] = (byte)(outNeighbor.getEdgeNumber()>>>8);
-            			nBuffer[5*outlist.indexOf(outNeighbor)+4] = (byte)outNeighbor.getEdgeNumber();
+                       	nBuffer[4*startBuffer] = (byte)(outNeighbor.getEdgeNumber()>>>24);
+            			nBuffer[4*startBuffer+1] = (byte)(outNeighbor.getEdgeNumber()>>>16);
+            			nBuffer[4*startBuffer+2] = (byte)(outNeighbor.getEdgeNumber()>>>8);
+            			nBuffer[4*startBuffer+3] = (byte)outNeighbor.getEdgeNumber();
+            			startBuffer++;
             		}
             	}
             			   			
