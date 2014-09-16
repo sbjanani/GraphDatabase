@@ -8,7 +8,7 @@ public class NeighborNodeRecord  {
 	public NeighborNodeRecord(int nodeNumber, int edgeNumber) {
 		//neighborNode = n;
 		neighborNode = nodeNumber;
-		edgeNumber = edgeNumber;
+		this.edgeNumber = edgeNumber;
 	}
 	
 
