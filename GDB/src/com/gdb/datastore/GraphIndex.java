@@ -10,6 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -61,14 +62,12 @@ public class GraphIndex {
         		adjArray.add(new AdjacencyRecord());
         	}
         	
-        	int edgeNumber = -1;
+        	int edgeNumber = 0;
                 
         		
                 Scanner s = new Scanner(new File(sourcePath+"/rel.dat"));
-                s.nextLine();
-
                 while(s.hasNext()){
-                		edgeNumber++;
+                		++edgeNumber;
                         int fromNode = s.nextInt();
                         int toNode = s.nextInt();
                         byte edgeType = s.nextByte();
@@ -115,17 +114,18 @@ public class GraphIndex {
                  	buffer[index++] = (byte) s; 
                  }
                  file.write(buffer);
+                 
+                 System.out.println("index : "+ i+" "+Arrays.toString(buffer));
              }
              file.close();
         }
         
         public void writeNodesAndEdges() throws IOException{
-       	 	RandomAccessFile nFile = new RandomAccessFile(destinationPath+"/nodes.dat","rw");
-       	 	RandomAccessFile eFile = new RandomAccessFile(destinationPath+"/edges.dat","rw");
-       	 	RandomAccessFile oFile = new RandomAccessFile(destinationPath+"/overFlow.dat","rw");
+       	 	RandomAccessFile nFile = new RandomAccessFile(destinationPath+"/nodefile.dat","rw");
+       	 	RandomAccessFile eFile = new RandomAccessFile(destinationPath+"/edgefile.dat","rw");
        	      for(int node = 0; node < adjArray.size(); node++){
-            	System.out.println("I= "+node);
-            	byte[] nBuffer = new byte[4+4*Constants.MAX_EDGES_NODES_DAT];
+            	//System.out.println("I= "+node);
+            	byte[] nBuffer = new byte[5*Constants.MAX_EDGES_NODES_DAT];
             	byte[] eBuffer = new byte[Constants.EDGE_DAT_SIZE];
             	Map<Byte,ArrayList<NeighborNodeRecord>> incoming = adjArray.get(node).getInComing();
             	Map<Byte,ArrayList<NeighborNodeRecord>> outgoing = adjArray.get(node).getOutGoing();
@@ -135,6 +135,7 @@ public class GraphIndex {
             		ArrayList<NeighborNodeRecord> inlist = incoming.get(edgeType);
             		ArrayList<NeighborNodeRecord> outlist = outgoing.get(edgeType);
             		
+            		if(!(null == inlist))
             		for(NeighborNodeRecord inNeighbor : inlist){
             			
             			eBuffer[0] = edgeType;
@@ -148,7 +149,11 @@ public class GraphIndex {
                         eBuffer[6] = (byte)(node>>>16);
                         eBuffer[7] = (byte)(node>>>8);
                         eBuffer[8] = (byte)(node);
-                        eFile.write(eBuffer,inNeighbor.getEdgeNumber(),Constants.EDGE_DAT_SIZE);
+                        eFile.seek(inNeighbor.getEdgeNumber());
+                        eFile.write(eBuffer);
+                        
+                      System.out.println("edge : " + inNeighbor.getEdgeNumber()+" "+Arrays.toString(eBuffer));
+                       
                         
                         nBuffer[5*inlist.indexOf(inNeighbor)] = 0;
             			nBuffer[5*inlist.indexOf(inNeighbor)+1] = (byte)(inNeighbor.getEdgeNumber()>>>24);
@@ -158,22 +163,25 @@ public class GraphIndex {
             			
             		}
             		
+            		if(!(null == outlist))
             		for(NeighborNodeRecord outNeighbor : outlist){
-            			                    
-                        nBuffer[5*inlist.indexOf(outNeighbor)] = 1;
-            			nBuffer[5*inlist.indexOf(outNeighbor)+1] = (byte)(outNeighbor.getEdgeNumber()>>>24);
-            			nBuffer[5*inlist.indexOf(outNeighbor)+2] = (byte)(outNeighbor.getEdgeNumber()>>>16);
-            			nBuffer[5*inlist.indexOf(outNeighbor)+3] = (byte)(outNeighbor.getEdgeNumber()>>>8);
-            			nBuffer[5*inlist.indexOf(outNeighbor)+4] = (byte)outNeighbor.getEdgeNumber();
+         
+                        nBuffer[5*outlist.indexOf(outNeighbor)] = 1;
+            			nBuffer[5*outlist.indexOf(outNeighbor)+1] = (byte)(outNeighbor.getEdgeNumber()>>>24);
+            			nBuffer[5*outlist.indexOf(outNeighbor)+2] = (byte)(outNeighbor.getEdgeNumber()>>>16);
+            			nBuffer[5*outlist.indexOf(outNeighbor)+3] = (byte)(outNeighbor.getEdgeNumber()>>>8);
+            			nBuffer[5*outlist.indexOf(outNeighbor)+4] = (byte)outNeighbor.getEdgeNumber();
             		}
             	}
             			   			
     			nFile.write(nBuffer);
     			
+    			System.out.println("node : "+ node+" "+Arrays.toString(nBuffer));
+    			
+    			
             }
             nFile.close();
             eFile.close();
-            oFile.close();
        }
 		
 		
