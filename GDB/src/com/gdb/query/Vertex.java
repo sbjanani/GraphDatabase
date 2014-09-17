@@ -70,13 +70,20 @@ public class Vertex extends Element{
 	public ArrayList<Edge> getEdges(Direction direction) throws IOException{
 		//dbPath = path;
 		ArrayList<Edge> result = new ArrayList<Edge>();
-		RandomAccessFile nFile = new RandomAccessFile(graph.dbPath+"nodes.dat","rw");
-		RandomAccessFile oFile = new RandomAccessFile(graph.dbPath+"overFlow.dat","rw");
-		int numIncoming = graph.getNumIncoming(id);
-		int numOutgoing = graph.getNumOutGoing(id);
-		nFile.seek(id*84);
-		if(direction.equals(Direction.OUT)){
-			if(numIncoming < 16){//add the outgoing edgeNumbers that fit in the regular space
+		RandomAccessFile nFile = new RandomAccessFile(graph.dbPath+"nodefile.dat","rw");
+		
+		short[] edgenums = graph.getGraphIndex().get(id).getEdgeNums();
+		nFile.seek(id*1024);
+		int dir;
+		if(direction.equals(Direction.IN))
+			dir=1;
+		else if(direction.equals(Direction.OUT))
+			dir=0;
+		else 
+			dir = 2;
+		if(direction.equals(Direction.BOTH)){
+			for(int i=0; i<edgenums.length; i++){
+				
 				nFile.seek(numIncoming*5+id*(Constants.MAX_EDGES_NODES_DAT*5+4));
 				for(int j = 0; j < Math.min(16-numIncoming,numOutgoing); j++){
 					nFile.readByte();

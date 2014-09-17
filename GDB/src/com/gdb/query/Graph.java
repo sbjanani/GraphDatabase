@@ -27,7 +27,7 @@ public class Graph {
 	 * This map is a secondary index that groups the vertices by their type(label).
 	 * There will will 8 entries, one for each vertex label and value will be an arraylist of vertices belonging to that type
 	 */
-	Map<Integer, ArrayList<Integer>> typeIndex;
+	Map<Byte, ArrayList<Integer>> typeIndex;
 	
 	String dbPath;
 	
@@ -99,7 +99,7 @@ public class Graph {
 	/**
 	 * @return the graphIndex
 	 */
-	public Map<Integer, ArrayList<Integer>> getTypeIndex() {
+	public Map<Byte, ArrayList<Integer>> getTypeIndex() {
 		return typeIndex;
 	}
 
@@ -107,16 +107,18 @@ public class Graph {
 	 * This method initializes the graph index
 	 * @param path - path to graphIndex.idx 
 	 */
-	public Map<Integer, ArrayList<Integer>> initializeTypeIndex(String path) {
-		Map<Integer,ArrayList<Integer>> result = new HashMap<Integer,ArrayList<Integer>>();
-		for(int i = 0; i < Constants.NUMBER_OF_NODE_TYPES; i++){
-			ArrayList<Integer> list = new ArrayList<Integer>();
-			for(int j = 0; j < graphIndex.size(); j++){
-				if(graphIndex.get(j).vertexType == i)
-					list.add(j);
+	public Map<Byte, ArrayList<Integer>> initializeTypeIndex(String path) {
+		Map<Byte,ArrayList<Integer>> result = new HashMap<Byte,ArrayList<Integer>>();
+		
+		for(int j = 0; j < graphIndex.size(); j++){
+			if(!(result.containsKey(graphIndex.get(j).vertexType))){
+				ArrayList<Integer> vertexList = new ArrayList<Integer>();
+				result.put(graphIndex.get(j).vertexType, vertexList);
 			}
-			result.put(i,list);
+			result.get(graphIndex.get(j)).add(j);
+				
 		}
+		
 		return result;
 	}
 	
@@ -167,7 +169,7 @@ public class Graph {
 	 */
 	public ArrayList<Vertex> getVertices() throws IOException{
 		ArrayList<Vertex> result = new ArrayList<Vertex>();
-		for(Integer i : typeIndex.keySet()){
+		for(Byte i : typeIndex.keySet()){
 			ArrayList<Integer> nodes = typeIndex.get(i);
 			for(int j = 0; j < nodes.size(); j++)
 				result.add(getVertex(nodes.get(j)));
