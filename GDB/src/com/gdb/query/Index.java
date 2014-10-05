@@ -1,5 +1,7 @@
 package com.gdb.query;
 
+import java.util.Map;
+
 /**
  * This class holds the index object for a vertex
  * @author sysadmin
@@ -24,7 +26,7 @@ public class Index {
 	 * array holding the number of edges incident with the vertex of a given type
 	 * The array length will be 8, one for each type 
 	 */
-	short[] edgeNums;
+	Map<String,Short> edgeNums;
 	/**
 	 * @return the vertexId
 	 */
@@ -64,21 +66,22 @@ public class Index {
 	/**
 	 * @return the edgeNums
 	 */
-	public short[] getEdgeNums() {
+	public Map<String,Short> getEdgeNums() {
 		return edgeNums;
 	}
 	/**
 	 * @param edgeNums the edgeNums to set
 	 */
-	public void setEdgeNums(short[] edgeNums) {
+	public void setEdgeNums(Map<String, Short> edgeNums) {
 		this.edgeNums = edgeNums;
 	}
 	
 	public String toString(){
 		String s = "Vertex ID: "+vertexId+ " Vertex Type: "+vertexType+" BitMap: "+edgeBitmap+"\n";
-		for(int i = 0; i < 16; i++){
-			s += edgeNums[i]+":";
+		for(Map.Entry<String, Short> countEntry : edgeNums.entrySet()){
+			s += countEntry.getKey()+":"+countEntry.getValue();
 		}
+		
 		return s+"\n";
 	}
 	

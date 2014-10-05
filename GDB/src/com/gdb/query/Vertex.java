@@ -67,9 +67,9 @@ public class Vertex extends Element{
 	 * @return - returns an ArrayList containing the Edge objects
 	 * @throws IOException 
 	 */
-	public ArrayList<Edge> getEdges(Direction direction) throws IOException{
+	public ArrayList<Vertex> getEdges(Direction direction) throws IOException{
 		//dbPath = path;
-		ArrayList<Edge> result = new ArrayList<Edge>();
+		ArrayList<Vertex> result = new ArrayList<Vertex>();
 		RandomAccessFile nFile = new RandomAccessFile(graph.dbPath+"nodefile.dat","rw");
 		
 		short[] edgenums = graph.getGraphIndex().get(id).getEdgeNums();

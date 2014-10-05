@@ -37,7 +37,7 @@ public class AdjacencyRecord {
 	
 	public void addIncoming(int value, byte edgeType, int edgeNumber){
 		
-		NeighborNodeRecord nr = new NeighborNodeRecord(value,edgeNumber);
+		NeighborNodeRecord nr = new NeighborNodeRecord(value,edgeType,edgeNumber);
 		
 		if(inComing.containsKey(edgeType)){
 			inComing.get(edgeType).add(nr);
@@ -54,7 +54,7 @@ public class AdjacencyRecord {
 	}
 	
 	public void addOutGoing(int value,byte edgeType, int edgeNumber){
-		NeighborNodeRecord nr = new NeighborNodeRecord(value,edgeNumber);
+		NeighborNodeRecord nr = new NeighborNodeRecord(value,edgeType,edgeNumber);
 		
 		if(outGoing.containsKey(edgeType)){
 			outGoing.get(edgeType).add(nr);
