@@ -9,137 +9,43 @@ import java.io.RandomAccessFile;
  *
  */
 
+/**
+ * @author sysadmin
+ *
+ */
 public class Edge extends Element {
 
-	
-	/**
-	 * label of the head node
-	 */
-	int headNodeLabel;
-	/**
-	 * label of the tail node
-	 */
-	int tailNodeLabel;
-	/**
-
-	/**
-	 * id of the node from which this edge object was created.
-	 */
-	int tailNodeId;
-	
-	int headNodeId;
+	Vertex vertex;
+	Direction direction;
 	
 	
 	
 	//go to the correct edge and initialize all of the fields,nodeId is tail node
-	public Edge(int nodeId,int edgeNumber,Graph g) throws IOException{
-		graph = g;
-		this.tailNodeId = nodeId;
-		id = edgeNumber;
-		RandomAccessFile eFile = new RandomAccessFile(g.dbPath+"edges.dat","r");
-		//seek to the point in the edges file where the edgeId information is stored
-		eFile.seek(id*Constants.EDGE_DAT_SIZE);
-		label = eFile.readByte();
-		eFile.readInt();
-		headNodeId = eFile.readInt();
-		tailNodeLabel = g.graphIndex.get(tailNodeId).getVertexType();
-		headNodeLabel = g.graphIndex.get(headNodeId).getVertexType();
-		eFile.close();
+	public Edge(byte label, Vertex vertex, Direction direction) throws IOException{
+		
+		this.label= label;
+		this.vertex = vertex;
+		this.direction = direction;
 	}
 	
 	/**
 	 * @return the nodeId
 	 */
-	public int getNodeId() {
-		return tailNodeId;
+	public Vertex getVertex() {
+		return vertex;
 	}
 
 	/**
 	 * @param nodeId
 	 *            the nodeId to set
 	 */
-	public void setNodeId(int nodeId) {
-		this.tailNodeId = nodeId;
+	public void setVertex(Vertex vertex) {
+		this.vertex = vertex;
 	}
 
-	/**
-	 * @return the headNodeType
-	 */
-	public int getHeadNodeLabel() {
-		return headNodeLabel;
-	}
-
-	/**
-	 * @param headNodeType
-	 *            the headNodeType to set
-	 */
-	public void setHeadNodeLabel(int headNodeType) {
-		this.headNodeLabel = headNodeType;
-	}
-
-	/**
-	 * @return the tailNodeType
-	 */
-	public int getTailNodeLabel() {
-		return tailNodeLabel;
-	}
-
-	/**
-	 * @param tailNodeType
-	 *            the tailNodeType to set
-	 */
-	public void setTailNodeLabel(int tailNodeType) {
-		this.tailNodeLabel = tailNodeType;
-	}
-
-	/**
-	 * This method returns the tail/out or head/in vertex. Throws
-	 * IllegalArgumentException if BOTH is provided in Direction
-	 * 
-	 * @param direction
-	 *            - tail/out or head/in vertex.
-	 * @return - returns the tail/out or head/in vertex.
-	 * @throws IOException 
-	 */
-
-	public Vertex getVertex(Direction direction) throws IllegalArgumentException, IOException{
-		if(direction.equals(Direction.BOTH))
-			throw new IllegalArgumentException("Direction cannot be BOTH");
-		Vertex v = null;
-		if(direction.equals(Direction.OUT))
-			v = graph.getVertex(tailNodeId);
-		else
-			v = graph.getVertex(headNodeId);
-		return v;
-	}
-
-	/**
-	 * This method returns the tail/out or head/in vertex satisfying the given
-	 * label. Throws IllegalArgumentException if BOTH is provided in Direction
-	 *
-	 * @param direction
-	 *            - tail/out or head/in vertex.
-	 * @param labelc
-	 *            - the type of vertex to return
-	 * @return - returns the tail/out or head/in vertex of the type Label.
-	 * @throws IllegalArgumentException
-	 * @throws IOException 
-	 */
-	public Vertex getVertex(Direction direction, int label)
-			throws IllegalArgumentException, IOException {
-		if(direction.equals(Direction.BOTH))
-			throw new IllegalArgumentException("Direction cannot be BOTH");
-		Vertex v = null;	
-		if(direction.equals(Direction.OUT) && tailNodeLabel == label)
-			v = graph.getVertex(tailNodeId);
-		else if(direction.equals(Direction.IN) && headNodeLabel == label)
-			v = graph.getVertex(headNodeId);
-		else
-			return null;
-		return v;
-	}
 	
+
 	public String toString(){
-		return "Edge Id: "+id;
+		return "\n Direction: "+direction+" Vertex: "+vertex.getId()+"\n";
 	}
 }

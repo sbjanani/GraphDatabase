@@ -26,7 +26,8 @@ public class Index {
 	 * array holding the number of edges incident with the vertex of a given type
 	 * The array length will be 8, one for each type 
 	 */
-	Map<String,Short> edgeNums;
+	Map<Byte,Short> incomingEdgeNums;
+	Map<Byte,Short> outgoingEdgeNums;
 	/**
 	 * @return the vertexId
 	 */
@@ -63,23 +64,42 @@ public class Index {
 	public void setEdgeBitmap(short edgeBitmap) {
 		this.edgeBitmap = edgeBitmap;
 	}
+
+	
 	/**
-	 * @return the edgeNums
+	 * @return the incomingEdgeNums
 	 */
-	public Map<String,Short> getEdgeNums() {
-		return edgeNums;
+	public Map<Byte, Short> getIncomingEdgeNums() {
+		return incomingEdgeNums;
 	}
 	/**
-	 * @param edgeNums the edgeNums to set
+	 * @param incomingEdgeNums the incomingEdgeNums to set
 	 */
-	public void setEdgeNums(Map<String, Short> edgeNums) {
-		this.edgeNums = edgeNums;
+	public void setIncomingEdgeNums(Map<Byte, Short> incomingEdgeNums) {
+		this.incomingEdgeNums = incomingEdgeNums;
+	}
+	/**
+	 * @return the outgingEdgeNums
+	 */
+	public Map<Byte, Short> getOutgoingEdgeNums() {
+		return outgoingEdgeNums;
+	}
+	/**
+	 * @param outgingEdgeNums the outgingEdgeNums to set
+	 */
+	public void setOutgoingEdgeNums(Map<Byte, Short> outgoingEdgeNums) {
+		this.outgoingEdgeNums = outgoingEdgeNums;
 	}
 	
 	public String toString(){
 		String s = "Vertex ID: "+vertexId+ " Vertex Type: "+vertexType+" BitMap: "+edgeBitmap+"\n";
-		for(Map.Entry<String, Short> countEntry : edgeNums.entrySet()){
-			s += countEntry.getKey()+":"+countEntry.getValue();
+		s += "\n incoming \n";
+		for(Map.Entry<Byte, Short> countEntry : incomingEdgeNums.entrySet()){
+			s += countEntry.getKey()+":"+countEntry.getValue()+";";
+		}
+		s += "\n outgoing \n";
+		for(Map.Entry<Byte, Short> countEntry : outgoingEdgeNums.entrySet()){
+			s += countEntry.getKey()+":"+countEntry.getValue()+";";
 		}
 		
 		return s+"\n";

@@ -103,8 +103,7 @@ public class Query {
 				int templevel = level;
 				
 				// get the next level neighbor
-				Vertex neighborVertex = edge.getVertex(Direction.IN);
-				
+				Vertex neighborVertex = edge.getVertex();		
 				
 				
 				// get the neighborhood of the current vertex

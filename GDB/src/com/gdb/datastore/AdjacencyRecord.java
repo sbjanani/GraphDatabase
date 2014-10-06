@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.gdb.util.Constants;
+
 public class AdjacencyRecord {
 	Map<Byte,ArrayList<NeighborNodeRecord>> inComing;
 	Map<Byte,ArrayList<NeighborNodeRecord>> outGoing;

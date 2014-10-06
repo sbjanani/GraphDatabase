@@ -4,6 +4,8 @@ package com.gdb.datastore;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+import com.gdb.util.Constants;
+
 
 public class NodeTypeIndex {
         String[] nodeTypes;

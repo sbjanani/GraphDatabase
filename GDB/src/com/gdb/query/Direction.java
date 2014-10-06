@@ -11,4 +11,6 @@ public enum Direction {
 	 * directions allowed
 	 */
 	IN, OUT, BOTH; 
+	
+	
 }

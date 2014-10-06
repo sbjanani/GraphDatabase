@@ -1,11 +1,12 @@
 package com.gdb.query;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.gdb.util.Constants;
 
 
 /**
@@ -30,6 +31,7 @@ public class Graph {
 	Map<Byte, ArrayList<Integer>> typeIndex;
 	
 	String dbPath;
+	
 	
 
 	/**
@@ -75,22 +77,26 @@ public class Graph {
 			byte outgoingEdgeBitMap = record[index++];
 			short edgeBitMap = (short) (256*incomingEdgeBitMap + outgoingEdgeBitMap);
 			element.setEdgeBitmap(edgeBitMap);
-			Map<String,Short> edgeNums = new HashMap<String,Short>();
+			Map<Byte,Short> incomingEdgeNums = new HashMap<Byte,Short>();
+			Map<Byte,Short> outgoingEdgeNums = new HashMap<Byte,Short>();
 			//go through all of the node types and populate the edgeNums array
-			for(int edgeType = 0; edgeType < Constants.NUMBER_OF_EDGE_TYPES; edgeType++){
+			for(Byte edgeType = Constants.NUMBER_OF_EDGE_TYPES-1; edgeType >=0; edgeType--){
 				//extract the number of incoming edges of each type
 				byte b1 = record[index++];
 				byte b2 = record[index++];
 				short numNodesIncoming = (short)(256*b1 + b2);
-				edgeNums.put("i"+edgeType, numNodesIncoming);
+				if(numNodesIncoming!=0)
+				incomingEdgeNums.put(edgeType, numNodesIncoming);
 				
 				//same for outoing
 				byte b11 = record[index++];
-				byte b22 = record[index++];
+				byte b22 = record[index++];				
 				short numNodesOutgoing = (short)(256*b11 + b22);
-				edgeNums.put("o"+edgeType, numNodesOutgoing);
+				if(numNodesOutgoing!=0)
+				outgoingEdgeNums.put(edgeType, numNodesOutgoing);
 			}
-			element.setEdgeNums(edgeNums);
+			element.setIncomingEdgeNums(incomingEdgeNums);
+			element.setOutgoingEdgeNums(outgoingEdgeNums);
 			result.add(element);
 		}
 		file.close();
@@ -112,11 +118,11 @@ public class Graph {
 		Map<Byte,ArrayList<Integer>> result = new HashMap<Byte,ArrayList<Integer>>();
 		
 		for(int j = 0; j < graphIndex.size(); j++){
-			if(!(result.containsKey(graphIndex.get(j).vertexType))){
+			if(!(result.containsKey(graphIndex.get(j).getVertexType()))){
 				ArrayList<Integer> vertexList = new ArrayList<Integer>();
 				result.put(graphIndex.get(j).vertexType, vertexList);
 			}
-			result.get(graphIndex.get(j)).add(j);
+			result.get(graphIndex.get(j).getVertexType()).add(j);
 				
 		}
 		
@@ -185,158 +191,38 @@ public class Graph {
 	 * @throws IOException 
 	 */
 	public Vertex getVertex(int id) throws IOException{
-		Vertex v = new Vertex();
-		v.setId(id);
-		v.setGraph(this);
-		int l = getLabel(id);
-		v.setLabel(l);
-		ArrayList<ArrayList<ArrayList<Integer>>> edgeList = new ArrayList<ArrayList<ArrayList<Integer>>>();
-		for(int i = 0; i < Constants.NUMBER_OF_EDGE_TYPES; i++){
-			ArrayList<ArrayList<Integer>> inOut = new ArrayList<ArrayList<Integer>>();
-			ArrayList<Integer> in = new ArrayList<Integer>();
-			ArrayList<Integer> out = new ArrayList<Integer>();
-			inOut.add(in);
-			inOut.add(out);
-			edgeList.add(inOut);
-		}
-		RandomAccessFile nFile = new RandomAccessFile(dbPath+"nodes.dat","r");
-		RandomAccessFile eFile = new RandomAccessFile(dbPath+"edges.dat","r");
-		RandomAccessFile oFile = new RandomAccessFile(dbPath+"overFlow.dat","r");
-//System.out.println("ID ABOVE: "+id);
-	    //arraylists to hold the edge numbers for the node id passed in the method
-		ArrayList<Integer> incoming = getIncomingNeighbors(nFile,oFile,id);
-		ArrayList<Integer> outgoing = getOutgoingNeighbors(nFile,oFile,id);
-//System.out.println("INCOMING: "+incoming);
-//System.out.println("OUTOING: "+outgoing);
-//for(int x = 0; x < graphIndex.get(id).edgeNums.length; x++){
-	//System.out.print(graphIndex.get(id).edgeNums[x]+" ");
-//}
-//System.out.println();
-		//incoming edge nums
-		for(int i = 0; i < incoming.size(); i++){
-			int eNum = incoming.get(i);
-			eFile.seek(Constants.EDGE_DAT_SIZE*eNum);
-			int edgeType = eFile.readByte();
-			int fromNodeId = eFile.readInt();
-			edgeList.get(edgeType).get(0).add(fromNodeId);
-		}
-		//outgoing edge nums
-		for(int i = 0; i < outgoing.size(); i++){
-			int eNum = outgoing.get(i);
-			eFile.seek(Constants.EDGE_DAT_SIZE*eNum);
-			int edgeType = eFile.readByte();
-			eFile.readInt();
-			int toNodeId = eFile.readInt();
-			edgeList.get(edgeType).get(1).add(toNodeId);
-		}
-		nFile.close();
-		eFile.close();
-		oFile.close();
-		v.setEdges(edgeList);
+		
+		Vertex v = new Vertex(id,this,graphIndex.get(id).getVertexType());	
+		v.setNumIncoming(getNumIncoming(id));
+		v.setNumOutgoing(getNumOutGoing(id));
 		return v;
 	}
 	
 	 
-	
-	private int getLabel(int id) {
-		for(int i = 0; i < typeIndex.size(); i++){
-			if(typeIndex.get(i).contains(id))
-				return i;
+
+	public short getNumIncoming(int nodeId){
+		short numIncoming = 0;
+		Map<Byte,Short> neighborCount = graphIndex.get(nodeId).getIncomingEdgeNums();
+		for(Map.Entry<Byte, Short> neighborCountEntry : neighborCount.entrySet()){
+			numIncoming += neighborCountEntry.getValue();
 		}
-		return -1;
-	}
-
-
-	private int getIncomingNeighborNode(RandomAccessFile eFile, ArrayList<Integer> incoming,
-			 int id, int eNum) throws IOException {
-		eFile.seek(Constants.EDGE_DAT_SIZE*incoming.get(eNum));
-		int fromNodeId = eFile.readInt();
-		return fromNodeId;
-	}
-	
-	private int getOutgoingNeighborNode(RandomAccessFile eFile,
-			ArrayList<Integer> outgoing, int id, int eNum) throws IOException {
-		eFile.seek(Constants.EDGE_DAT_SIZE*outgoing.get(eNum));
-		eFile.readInt();
-		int toNodeId = eFile.readInt();
-		return toNodeId;
-	}
-	
-	public int getNumIncoming(int nodeId){
-		int numIncoming = 0;
-		for(int i = 0; i < graphIndex.get(nodeId).edgeNums.length; i+=2)
-			numIncoming += graphIndex.get(nodeId).edgeNums[i];
+		
 		return numIncoming;
 	}
 	
-	public int getNumOutGoing(int nodeId){
-		int numOutgoing = 0;
-		for(int j = 1; j < graphIndex.get(nodeId).edgeNums.length; j+=2)
-			numOutgoing += graphIndex.get(nodeId).edgeNums[j];
+	public short getNumOutGoing(int nodeId){
+		short numOutgoing = 0;
+		Map<Byte,Short> neighborCount = graphIndex.get(nodeId).getOutgoingEdgeNums();
+		for(Map.Entry<Byte, Short> neighborCountEntry : neighborCount.entrySet()){
+			numOutgoing += neighborCountEntry.getValue();
+		}
 		return numOutgoing;
 	}
 
 
-	private ArrayList<Integer> getOutgoingNeighbors(RandomAccessFile nFile,
-			 RandomAccessFile oFile, int id) throws IOException {
-		ArrayList<Integer> result = new ArrayList<Integer>();
-		int numIncoming = 0;
-		int numOutgoing = 0;
-		nFile.seek(id*(Constants.MAX_EDGES_NODES_DAT*5+4));
-		for(int i = 0; i < graphIndex.get(id).edgeNums.length; i+=2)
-			numIncoming += graphIndex.get(id).edgeNums[i];
-		for(int j = 1; j < graphIndex.get(id).edgeNums.length; j+=2)
-			numOutgoing += graphIndex.get(id).edgeNums[j];
-		if(numIncoming < 16){//add the outgoing edgeNumbers that fit in the regular space
-			nFile.seek(numIncoming*5+id*(Constants.MAX_EDGES_NODES_DAT*5+4));
-			for(int j = 0; j < Math.min(16-numIncoming,numOutgoing); j++){
-				nFile.readByte();
-				int edgeNumber = nFile.readInt();
-				result.add(edgeNumber);
-			}
-		}
-		if(numIncoming + numOutgoing > 16){//add from overflow area
-			nFile.seek(Constants.MAX_EDGES_NODES_DAT*5+id*(Constants.MAX_EDGES_NODES_DAT*5+4));
-			int overFlowPointer = nFile.readInt();
-			int offset = (numIncoming < 16) ? overFlowPointer : overFlowPointer+(numIncoming-16)*5;
-			oFile.seek(offset);
-			int numToRead = (numIncoming < 16) ? numOutgoing - 16 + numIncoming : numOutgoing;
-			for(int i = 0; i < numToRead; i++){
-				oFile.readByte();
-				int edgeNumber = oFile.readInt();
-				result.add(edgeNumber);
-			}
-		}
-		return result;
-	}
+	
 
-
-	private ArrayList<Integer> getIncomingNeighbors(RandomAccessFile nFile,
-			RandomAccessFile oFile, int id) throws IOException {
-		ArrayList<Integer> result = new ArrayList<Integer>();
-		int numEdges = 0;
-//System.out.println("ID: "+id);
-		for(int i = 0; i < graphIndex.get(id).edgeNums.length; i+=2)
-			numEdges += graphIndex.get(id).edgeNums[i];
-		nFile.seek(id*(Constants.MAX_EDGES_NODES_DAT*5+4));
-		for(int j = 0; j < Math.min(16,numEdges); j++){
-			nFile.readByte();
-			int edgeNumber = nFile.readInt();
-			result.add(edgeNumber);
-		}
-		if(numEdges > 16){
-			int overFlowPointer = nFile.readInt();
-			oFile.seek(overFlowPointer);
-			for(int i = 0; i < numEdges-16; i++){
-				oFile.readByte();
-				int edgeNumber = oFile.readInt();
-				result.add(edgeNumber);
-			}
-		}
-		return result;
-	}
-
-
+	
 	/**
 	 * This method adds a vertex to the graph
 	 * @param label - label for the vertex
@@ -382,4 +268,38 @@ public class Graph {
 	public void deleteEdge(int id){
 		
 	}
+
+
+	/**
+	 * @return the dbPath
+	 */
+	public String getDbPath() {
+		return dbPath;
+	}
+
+
+	/**
+	 * @param dbPath the dbPath to set
+	 */
+	public void setDbPath(String dbPath) {
+		this.dbPath = dbPath;
+	}
+
+
+	/**
+	 * @param graphIndex the graphIndex to set
+	 */
+	public void setGraphIndex(ArrayList<Index> graphIndex) {
+		this.graphIndex = graphIndex;
+	}
+
+
+	/**
+	 * @param typeIndex the typeIndex to set
+	 */
+	public void setTypeIndex(Map<Byte, ArrayList<Integer>> typeIndex) {
+		this.typeIndex = typeIndex;
+	}
+	
+	
 }

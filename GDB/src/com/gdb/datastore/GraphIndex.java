@@ -9,10 +9,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Scanner;
+
+import com.gdb.util.Constants;
 
 public class GraphIndex {
 	ArrayList<Byte> nodeTypes;
@@ -106,6 +109,9 @@ public class GraphIndex {
 	}
 
 	public void writeGraphIndex() throws IOException {
+		
+		new File(destinationPath
+				+ "/graph.idx").delete();
 		RandomAccessFile file = new RandomAccessFile(destinationPath
 				+ "/graph.idx", "rw");
 		for (int i = 0; i < adjArray.size(); i++) {
@@ -130,12 +136,18 @@ public class GraphIndex {
 	}
 
 	public void writeNodesAndEdges() throws IOException {
+		
+		new File(destinationPath
+				+ "/nodefile.dat").delete();
+		
 		RandomAccessFile nFile = new RandomAccessFile(destinationPath
 				+ "/nodefile.dat", "rw");
 
 		for (int node = 0; node < adjArray.size(); node++) {
 			// System.out.println("I= "+node);
 			byte[] nBuffer = new byte[4 * Constants.MAX_EDGES_NODES_DAT];
+			System.out.println("Max no of edges = "+Constants.MAX_EDGES_NODES_DAT);
+			System.out.println("nbuffer size ="+nBuffer.length);
 			
 			Map<Byte, ArrayList<NeighborNodeRecord>> incoming = adjArray.get(
 					node).getInComing();
@@ -197,7 +209,7 @@ public class GraphIndex {
 			nFile.write(nBuffer);
 
 			System.out.println("node : " + node + " "
-					+ Arrays.toString(nBuffer));
+					+ Arrays.toString(nBuffer)+" nbuffer size = "+nBuffer.length);
 
 		}
 		nFile.close();

@@ -1,6 +1,7 @@
 package com.gdb.datastore;
 
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 
 /**
@@ -20,5 +21,11 @@ public class GraphStart {
                 gi.readEdges();
                 //gi.displayAdjRecord();                
                 gi.writeGraph();
+                
+             /*   RandomAccessFile raf = new RandomAccessFile("nodefile.dat","r");
+                raf.seek(65);
+                System.out.println(raf.readInt());
+                raf.close();*/
+                
         }
 }

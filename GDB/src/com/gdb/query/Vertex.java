@@ -1,9 +1,12 @@
 package com.gdb.query;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Map;
+
+import com.gdb.util.Constants;
 
 /**
  * This class holds the methods related to a vertex.
@@ -12,40 +15,25 @@ import java.util.Map;
  */
 public class Vertex extends Element{
 
-	/** This structure can hold the edges incident with the given vertex
-	 * This is a three dimensional arraylist structure. The first dimension specifies the edge type.
-	 * The second dimension is an arraylist containing the incoming edges at index 0 and outgoing edges at index 1
-	 * The third dimension is an arraylist containing the actual vertex ids.
-	 * A sample edges array would be of the form:
-	 * [<(1,2),(3,4)>, ----> This is the entry for edge type 0
-	 *    |     -----------> This is the outgoing edge list for edge type 0
-	 *    -----------------> This is the incoming edge list for edge type 0
-	 * <(5,6),(7,8)>,
-	 * <(9,10),(11,12)>]
-	 * Here the entire arraylist is the one marked under [ and ]
-	 * Each entry in the arraylist marked under < and > and represents the edges of a specific type incident with the vertex
-	 * Each entry marked under ( and ) represents the actual edge numbers  
-	 * 
-	 */
-	public ArrayList<ArrayList<ArrayList<Integer>>> edgeList;
+	short numIncoming;
+	short numOutgoing;
+	Map<Byte,Short> incomingEdgeCount;
+	Map<Byte,Short> outgoingEdgeCount;
 	
 	
 	
-
-	/**
-	 * @return the edges
-	 */
-	public ArrayList<ArrayList<ArrayList<Integer>>> getEdgeList() {
-		return edgeList;
+	
+	public Vertex(int id, Graph graph, int label){
+		 
+		this.id = id;
+		this.graph = graph;
+		this.label = label;
+		this.incomingEdgeCount=this.graph.getGraphIndex().get(this.id).getIncomingEdgeNums();
+		this.outgoingEdgeCount=this.graph.getGraphIndex().get(this.id).getOutgoingEdgeNums();
 	}
+	
 
 
-	/**
-	 * @param edges the edges to set
-	 */
-	public void setEdges(ArrayList<ArrayList<ArrayList<Integer>>> edgeList) {
-		this.edgeList = edgeList;
-	}
 
 
 	/**
@@ -67,65 +55,31 @@ public class Vertex extends Element{
 	 * @return - returns an ArrayList containing the Edge objects
 	 * @throws IOException 
 	 */
-	public ArrayList<Vertex> getEdges(Direction direction) throws IOException{
+	public ArrayList<Edge> getEdges(Direction direction) throws IOException{
 		//dbPath = path;
-		ArrayList<Vertex> result = new ArrayList<Vertex>();
-		RandomAccessFile nFile = new RandomAccessFile(graph.dbPath+"nodefile.dat","rw");
+		ArrayList<Edge> result ;
 		
-		short[] edgenums = graph.getGraphIndex().get(id).getEdgeNums();
-		nFile.seek(id*1024);
-		int dir;
-		if(direction.equals(Direction.IN))
-			dir=1;
-		else if(direction.equals(Direction.OUT))
-			dir=0;
-		else 
-			dir = 2;
-		if(direction.equals(Direction.BOTH)){
-			for(int i=0; i<edgenums.length; i++){
 				
-				nFile.seek(numIncoming*5+id*(Constants.MAX_EDGES_NODES_DAT*5+4));
-				for(int j = 0; j < Math.min(16-numIncoming,numOutgoing); j++){
-					nFile.readByte();
-					int edgeNumber = nFile.readInt();
-					Edge e = new Edge(id,edgeNumber,graph);
-					result.add(e);
-				}
-			}
-			if(numIncoming + numOutgoing > 16){//add from overflow area
-				nFile.seek(Constants.MAX_EDGES_NODES_DAT*5+id*(Constants.MAX_EDGES_NODES_DAT*5+4));
-				int overFlowPointer = nFile.readInt();
-				int offset = (numIncoming < 16) ? overFlowPointer : overFlowPointer+(numIncoming-16)*5;
-				oFile.seek(offset);
-				int numToRead = (numIncoming < 16) ? numOutgoing - 16 + numIncoming : numOutgoing;
-				for(int i = 0; i < numToRead; i++){
-					oFile.readByte();
-					int edgeNumber = oFile.readInt();
-					Edge e = new Edge(id,edgeNumber,graph);
-					result.add(e);
-				}
-			}
-		}//end of outoing if
-		else{
-			for(int j = 0; j < Math.min(16,numIncoming); j++){
-				nFile.readByte();
-				int edgeNumber = nFile.readInt();
-				Edge e = new Edge(id,edgeNumber,graph);
-				result.add(e);
-			}
-			if(numIncoming > 16){
-				int overFlowPointer = nFile.readInt();
-				oFile.seek(overFlowPointer);
-				for(int i = 0; i < numIncoming-16; i++){
-					oFile.readByte();
-					int edgeNumber = oFile.readInt();
-					Edge e = new Edge(id,edgeNumber,graph);
-					result.add(e);
-				}
-			}
-		}//end of incoming else
-		nFile.close();
-		oFile.close();
+		// set the file pointer to the beginning of the node record
+		int nodeOffset = id*Constants.MAX_EDGES_NODES_DAT*4;
+		int startOffset=nodeOffset;
+		
+		// if direction is outgoing, skip 
+		if(direction.equals(Direction.OUT))
+			startOffset += this.getNumIncoming()*4;
+		
+		// if the direction is both, get both incoming as well as outgoing edges
+		if(direction.equals(Direction.BOTH)){
+			result = getNeighborEdges(startOffset, Direction.IN);
+			startOffset = this.getNumIncoming();
+			result.addAll(getNeighborEdges(startOffset, Direction.OUT));
+		}
+		
+		// else get only the incoming/outgoing edges
+		else
+			result = getNeighborEdges(startOffset, direction);		
+		
+		
 		return result;
 	}
 	
@@ -141,12 +95,128 @@ public class Vertex extends Element{
 		return null;
 	}
 	
+	
+
+
+	
+
+	public ArrayList<Edge> getNeighborEdges(int startOffset, Direction direction){
+		
+		ArrayList<Edge> neighborList = new ArrayList<Edge>();
+		Map<Byte,Short> neighborCount;
+		
+		if(direction.equals(Direction.IN))
+			neighborCount = getIncomingEdgeCount();
+		else
+			neighborCount = getOutgoingEdgeCount();
+		
+		try {
+			RandomAccessFile dataFile = new RandomAccessFile(graph.dbPath+Constants.DATA_FILE,"rw");
+			dataFile.seek(startOffset);
+			
+			for(byte edgeType = 0; edgeType<Constants.NUMBER_OF_EDGE_TYPES; edgeType++){
+				if(neighborCount.containsKey(edgeType)){
+					 for(short i=0; i<neighborCount.get(edgeType); i++){
+						 int nodeId = dataFile.readInt();
+						 Edge edge = new Edge(edgeType, this.graph.getVertex(nodeId),direction);
+						 neighborList.add(edge);
+					 }
+				}
+			}
+			
+			dataFile.close();
+			
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	
+	
+		
+		
+		return neighborList;
+	}
+
+	/**
+	 * @return the numIncoming
+	 */
+	public short getNumIncoming() {
+		 numIncoming = 0;
+		 Map<Byte,Short> neighborCount = this.getIncomingEdgeCount();
+			for(Map.Entry<Byte, Short> neighborCountEntry : neighborCount.entrySet()){				
+					numIncoming += neighborCountEntry.getValue();
+			}
+		return numIncoming;
+	}
+
+
+	/**
+	 * @param numIncoming the numIncoming to set
+	 */
+	public void setNumIncoming(short numIncoming) {
+		this.numIncoming = numIncoming;
+	}
+
+
+	/**
+	 * @return the numOutgoing
+	 */
+	public short getNumOutgoing() {
+		 numOutgoing = 0;
+		Map<Byte,Short> neighborCount = this.getOutgoingEdgeCount();
+		for(Map.Entry<Byte, Short> neighborCountEntry : neighborCount.entrySet()){
+				numOutgoing += neighborCountEntry.getValue();
+		}
+		return numOutgoing;
+	}
+
+
+	/**
+	 * @param numOutgoing the numOutgoing to set
+	 */
+	public void setNumOutgoing(short numOutgoing) {
+		this.numOutgoing = numOutgoing;
+	}
+
+
+	/**
+	 * @return the incomingEdgeCount
+	 */
+	public Map<Byte, Short> getIncomingEdgeCount() {
+		return incomingEdgeCount;
+	}
+
+
+	/**
+	 * @param incomingEdgeCount the incomingEdgeCount to set
+	 */
+	public void setIncomingEdgeCount(Map<Byte, Short> incomingEdgeCount) {
+		this.incomingEdgeCount = incomingEdgeCount;
+	}
+
+
+	/**
+	 * @return the outgoingEdgeCount
+	 */
+	public Map<Byte, Short> getOutgoingEdgeCount() {
+		return outgoingEdgeCount;
+	}
+
+
+	/**
+	 * @param outgoingEdgeCount the outgoingEdgeCount to set
+	 */
+	public void setOutgoingEdgeCount(Map<Byte, Short> outgoingEdgeCount) {
+		this.outgoingEdgeCount = outgoingEdgeCount;
+	}
+	
 	public String toString(){
-		return "Vertex id: "+id+" Vertex label: "+label+"\n"+"EDGE LIST: "+edgeList; 
+		
+		return "\n Id: "+this.getId()+" label: "+this.getLabel()+"\n";
 	}
-
-
-	public void setGraph(Graph g) {
-		graph  = g;	
-	}
+	
 }
