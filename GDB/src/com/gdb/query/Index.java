@@ -17,11 +17,11 @@ public class Index {
 	 * The type of the vertex. 
 	 */
 	byte vertexType;
+
 	/**
-	 * The edge bitmap which specifies if there is an incoming/outgoing edge of each type
-	 * 2 bits per edge type(1 for incoming, 1 for outgoing) for a total of 8 types = 16 bits = short
+	 * 0 indicates active, 1 indicates deleted
 	 */
-	short edgeBitmap;
+	byte deleted;
 	/**
 	 * array holding the number of edges incident with the vertex of a given type
 	 * The array length will be 8, one for each type 
@@ -52,20 +52,20 @@ public class Index {
 	public void setVertexType(byte vertexType) {
 		this.vertexType = vertexType;
 	}
-	/**
-	 * @return the edgeBitmap
-	 */
-	public short getEdgeBitmap() {
-		return edgeBitmap;
-	}
-	/**
-	 * @param edgeBitmap the edgeBitmap to set
-	 */
-	public void setEdgeBitmap(short edgeBitmap) {
-		this.edgeBitmap = edgeBitmap;
-	}
 
 	
+	/**
+	 * @return the deleted
+	 */
+	public byte getDeleted() {
+		return deleted;
+	}
+	/**
+	 * @param deleted the deleted to set
+	 */
+	public void setDeleted(byte deleted) {
+		this.deleted = deleted;
+	}
 	/**
 	 * @return the incomingEdgeNums
 	 */
@@ -92,7 +92,7 @@ public class Index {
 	}
 	
 	public String toString(){
-		String s = "Vertex ID: "+vertexId+ " Vertex Type: "+vertexType+" BitMap: "+edgeBitmap+"\n";
+		String s = "Vertex ID: "+vertexId+ " Vertex Type: "+vertexType+"\n";
 		s += "\n incoming \n";
 		for(Map.Entry<Byte, Short> countEntry : incomingEdgeNums.entrySet()){
 			s += countEntry.getKey()+":"+countEntry.getValue()+";";

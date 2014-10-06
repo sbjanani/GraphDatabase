@@ -115,11 +115,10 @@ public class GraphIndex {
 		RandomAccessFile file = new RandomAccessFile(destinationPath
 				+ "/graph.idx", "rw");
 		for (int i = 0; i < adjArray.size(); i++) {
-			byte[] buffer = new byte[3 + 4 * Constants.NUMBER_OF_EDGE_TYPES];
-			buffer[0] = nodeTypes.get(i);
-			buffer[1] = adjArray.get(i).inComingEdgeBitMap;
-			buffer[2] = adjArray.get(i).outGoingEdgeBitMap;
-			int index = 3;
+			byte[] buffer = new byte[2 + 4 * Constants.NUMBER_OF_EDGE_TYPES];
+			buffer[0] = 0;
+			buffer[1] = nodeTypes.get(i);
+			int index = 2;
 			for (byte k = Constants.NUMBER_OF_EDGE_TYPES - 1; k >= 0; k--) {
 				short s = adjArray.get(i).getInComingCount()[k];
 				buffer[index++] = (byte) (s >>> 8);
@@ -146,8 +145,7 @@ public class GraphIndex {
 		for (int node = 0; node < adjArray.size(); node++) {
 			// System.out.println("I= "+node);
 			byte[] nBuffer = new byte[4 * Constants.MAX_EDGES_NODES_DAT];
-			System.out.println("Max no of edges = "+Constants.MAX_EDGES_NODES_DAT);
-			System.out.println("nbuffer size ="+nBuffer.length);
+			
 			
 			Map<Byte, ArrayList<NeighborNodeRecord>> incoming = adjArray.get(
 					node).getInComing();

@@ -64,19 +64,18 @@ public class Graph {
 		RandomAccessFile file = new RandomAccessFile(path,"rw");
 		//Go through all of the nodes in the file
 		//num nodes = file.length/35 because each record is 35 bytes
-		for(int i = 0; i < (file.length()/35); i++){
+		for(int i = 0; i < (file.length()/Constants.INDEX_RECORD_LENGTH); i++){
 			int index = 0;
 			Index element = new Index();
 			//read the whole record into a buffer
-			byte[] record = new byte[35];
+			byte[] record = new byte[Constants.INDEX_RECORD_LENGTH];
 			file.read(record);
 			element.setVertexId(i);
+			byte deleted = record[index++];
+			element.setDeleted(deleted);
 			byte vertexType = record[index++];
 			element.setVertexType(vertexType);
-			byte incomingEdgeBitMap = record[index++];
-			byte outgoingEdgeBitMap = record[index++];
-			short edgeBitMap = (short) (256*incomingEdgeBitMap + outgoingEdgeBitMap);
-			element.setEdgeBitmap(edgeBitMap);
+			
 			Map<Byte,Short> incomingEdgeNums = new HashMap<Byte,Short>();
 			Map<Byte,Short> outgoingEdgeNums = new HashMap<Byte,Short>();
 			//go through all of the node types and populate the edgeNums array

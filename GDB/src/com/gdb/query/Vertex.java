@@ -19,6 +19,7 @@ public class Vertex extends Element{
 	short numOutgoing;
 	Map<Byte,Short> incomingEdgeCount;
 	Map<Byte,Short> outgoingEdgeCount;
+
 	
 	
 	
@@ -30,6 +31,7 @@ public class Vertex extends Element{
 		this.label = label;
 		this.incomingEdgeCount=this.graph.getGraphIndex().get(this.id).getIncomingEdgeNums();
 		this.outgoingEdgeCount=this.graph.getGraphIndex().get(this.id).getOutgoingEdgeNums();
+		
 	}
 	
 
