@@ -16,7 +16,8 @@ public class GraphStart {
          * @throws IOException 
          */
         public static void main(String args[]) throws IOException{
-                GraphIndex gi = new GraphIndex(".", ".");
+        	
+                GraphIndex gi = new GraphIndex("/home/data/Gplus", "/home/data/Gplus");
                 gi.readNodes();
                 gi.readEdges();
                 //gi.displayAdjRecord();                

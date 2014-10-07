@@ -47,9 +47,10 @@ public class GraphIndex {
 	public void readNodes() throws FileNotFoundException {
 
 		Scanner s = new Scanner(new File(sourcePath + "/nodes.dat"));
+		System.out.println(sourcePath + "/nodes.dat");
 		nodeTypes = new ArrayList<Byte>();
 		while (s.hasNext()) {
-			nodeTypes.add(s.nextInt(), s.nextByte());
+		nodeTypes.add(s.nextInt()-1, s.nextByte());
 			if (s.hasNext())
 				s.nextLine();
 		}
@@ -72,21 +73,26 @@ public class GraphIndex {
 			adjArray.add(new AdjacencyRecord());
 		}
 
-		int edgeNumber = 0;
+		
 
 		Scanner s = new Scanner(new File(sourcePath + "/rel.dat"));
 		while (s.hasNext()) {
-			++edgeNumber;
+			
 			int fromNode = s.nextInt();
 			int toNode = s.nextInt();
 			byte edgeType = s.nextByte();
 			if (s.hasNext())
 				s.nextLine();
 
-			adjArray.get(fromNode).addOutGoing(toNode, edgeType, edgeNumber);
-			adjArray.get(fromNode).setOutGoingBit(edgeType);
-			adjArray.get(toNode).addIncoming(fromNode, edgeType, edgeNumber);
-			adjArray.get(toNode).setInComingBit(edgeType);
+			System.out.println(adjArray.get(fromNode).getOutGoing().size());
+			System.out.println(adjArray.get(toNode).getInComing().size());
+			if(adjArray.get(fromNode).getOutGoing().size()<=16 && adjArray.get(toNode).getInComing().size()<=16)
+			adjArray.get(fromNode).addOutGoing(toNode, edgeType);
+			
+			System.out.println(adjArray.get(toNode).getInComing().size());
+			System.out.println(adjArray.get(fromNode).getOutGoing().size());
+			if(adjArray.get(toNode).getInComing().size()<=16 && adjArray.get(fromNode).getOutGoing().size()<=16)
+			adjArray.get(toNode).addIncoming(fromNode, edgeType);
 
 		}
 
@@ -121,9 +127,13 @@ public class GraphIndex {
 			int index = 2;
 			for (byte k = Constants.NUMBER_OF_EDGE_TYPES - 1; k >= 0; k--) {
 				short s = adjArray.get(i).getInComingCount()[k];
+				if(s>16)
+					System.out.println("incoming greater than 16 here for node "+i);
 				buffer[index++] = (byte) (s >>> 8);
 				buffer[index++] = (byte) s;
 				s = adjArray.get(i).getOutGoingCount()[k];
+				if(s>16)
+					System.out.println("outgoing greater than 16 here for node "+i);
 				buffer[index++] = (byte) (s >>> 8);
 				buffer[index++] = (byte) s;
 			}
@@ -222,5 +232,6 @@ public class GraphIndex {
 			System.out.println(adjArray.get(i));
 		}
 	}
-
+	
+	
 }

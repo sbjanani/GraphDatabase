@@ -3,13 +3,13 @@ package com.gdb.datastore;
 public class NeighborNodeRecord  {
 	public int neighborNode;
 	public byte edgeType;
-	public int edgeNumber;
+
 	
-	public NeighborNodeRecord(int nodeNumber, byte edgeType, int edgeNumber) {
+	public NeighborNodeRecord(int nodeNumber, byte edgeType) {
 		//neighborNode = n;
 		this.neighborNode = nodeNumber;
 		this.edgeType = edgeType;
-		this.edgeNumber = edgeNumber;
+		
 	}
 	
 
@@ -27,20 +27,7 @@ public class NeighborNodeRecord  {
 		this.neighborNode = neighborNode;
 	}
 
-	/**
-	 * @return the edgeNumber
-	 */
-	public int getEdgeNumber() {
-		return edgeNumber;
-	}
-
-	/**
-	 * @param edgeNumber the edgeNumber to set
-	 */
-	public void setEdgeNumber(int edgeNumber) {
-		this.edgeNumber = edgeNumber;
-	}
-
+	
 
 	/**
 	 * @return the edgeType

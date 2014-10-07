@@ -12,8 +12,7 @@ public class AdjacencyRecord {
 	Map<Byte,ArrayList<NeighborNodeRecord>> outGoing;
 	short[] inComingCount;
 	short[] outGoingCount;
-	byte inComingEdgeBitMap;
-	byte outGoingEdgeBitMap;
+
 	
 	
 	
@@ -22,8 +21,7 @@ public class AdjacencyRecord {
 		outGoing = new HashMap<Byte,ArrayList<NeighborNodeRecord>>();
 		inComingCount = new short[Constants.NUMBER_OF_EDGE_TYPES];
 		outGoingCount = new short[Constants.NUMBER_OF_EDGE_TYPES];
-		inComingEdgeBitMap = 0;
-		outGoingEdgeBitMap = 0;
+
 	}
 	
 	public short getIncomingCount(byte edgeType){
@@ -37,9 +35,9 @@ public class AdjacencyRecord {
 		return (short) outGoing.get(edgeType).size();
 	}
 	
-	public void addIncoming(int value, byte edgeType, int edgeNumber){
+	public void addIncoming(int value, byte edgeType){
 		
-		NeighborNodeRecord nr = new NeighborNodeRecord(value,edgeType,edgeNumber);
+		NeighborNodeRecord nr = new NeighborNodeRecord(value,edgeType);
 		
 		if(inComing.containsKey(edgeType)){
 			inComing.get(edgeType).add(nr);
@@ -55,8 +53,8 @@ public class AdjacencyRecord {
 		inComingCount[edgeType]++;
 	}
 	
-	public void addOutGoing(int value,byte edgeType, int edgeNumber){
-		NeighborNodeRecord nr = new NeighborNodeRecord(value,edgeType,edgeNumber);
+	public void addOutGoing(int value,byte edgeType){
+		NeighborNodeRecord nr = new NeighborNodeRecord(value,edgeType);
 		
 		if(outGoing.containsKey(edgeType)){
 			outGoing.get(edgeType).add(nr);
@@ -70,14 +68,7 @@ public class AdjacencyRecord {
 		
 		outGoingCount[edgeType]++;
 	}
-	
-	public void setInComingBit(int index){
-		inComingEdgeBitMap = (byte) (inComingEdgeBitMap | (byte)(Math.pow(2,index)));
-	}
-	
-	public void setOutGoingBit(int index){
-		outGoingEdgeBitMap = (byte) (outGoingEdgeBitMap | (byte)(Math.pow(2,index)));
-	}
+
 
 	public Map<Byte, ArrayList<NeighborNodeRecord>> getInComing() {
 		return inComing;
@@ -95,21 +86,7 @@ public class AdjacencyRecord {
 		this.outGoing = outGoing;
 	}
 	
-	public byte getInComingEdgeBitMap() {
-		return inComingEdgeBitMap;
-	}
 	
-	public void setInComingEdgeBitMap(byte edgeBitMap) {
-		this.inComingEdgeBitMap = edgeBitMap;
-	}
-	
-	public byte getOutGoingEdgeBitMap() {
-		return outGoingEdgeBitMap;
-	}
-	
-	public void setOutGoingEdgeBitMap(byte edgeBitMap) {
-		this.outGoingEdgeBitMap = edgeBitMap;
-	}
 	
 	public String toString(){
 		return "incoming = "+inComing + "\n" + "outoing= "+outGoing + "\n\n";
