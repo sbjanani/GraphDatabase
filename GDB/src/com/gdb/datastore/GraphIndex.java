@@ -73,27 +73,30 @@ public class GraphIndex {
 			adjArray.add(new AdjacencyRecord());
 		}
 
-		
+		int[] incoming = new int[nodeTypes.size()];
+		int[] outgoing = new int[nodeTypes.size()];
 
 		Scanner s = new Scanner(new File(sourcePath + "/rel.dat"));
 		while (s.hasNext()) {
 			
-			int fromNode = s.nextInt();
-			int toNode = s.nextInt();
+			int fromNode = s.nextInt()-1;
+			int toNode = s.nextInt()-1;
 			byte edgeType = s.nextByte();
+			
+
+			outgoing[fromNode]++;
+			incoming[toNode]++;
+			if(outgoing[fromNode]<=16 && incoming[toNode]<=16){
+			
+				adjArray.get(fromNode).addOutGoing(toNode, edgeType);			
+				adjArray.get(toNode).addIncoming(fromNode, edgeType);
+			}
+
+			//System.out.println("out for "+fromNode+" is "+adjArray.get(fromNode).getOutGoing().size());
+			//System.out.println("inf for "+toNode+" is "+adjArray.get(toNode).getInComing().size());
+		
 			if (s.hasNext())
 				s.nextLine();
-
-			System.out.println(adjArray.get(fromNode).getOutGoing().size());
-			System.out.println(adjArray.get(toNode).getInComing().size());
-			if(adjArray.get(fromNode).getOutGoing().size()<=16 && adjArray.get(toNode).getInComing().size()<=16)
-			adjArray.get(fromNode).addOutGoing(toNode, edgeType);
-			
-			System.out.println(adjArray.get(toNode).getInComing().size());
-			System.out.println(adjArray.get(fromNode).getOutGoing().size());
-			if(adjArray.get(toNode).getInComing().size()<=16 && adjArray.get(fromNode).getOutGoing().size()<=16)
-			adjArray.get(toNode).addIncoming(fromNode, edgeType);
-
 		}
 
 		s.close();
