@@ -13,6 +13,11 @@ import java.util.Map;
 public class Query {
 
 	String path;
+	Graph graph;
+	
+	public Query(Graph graph){
+		this.graph=graph;
+	}
 	/**
 	 * This method returns the set of paths satisfying the given query
 	 * The paths are returned in the form Vertex-Edge-Vertex-Edge
@@ -46,17 +51,19 @@ public class Query {
 	 */
 	public void khopNeighborhood(Vertex vertex,int k,String vertexLabel) throws IOException{
 		
-		
+		long starttime = System.nanoTime();
 		
 		// arraylist containing khop neighborhood. start with level = 0
-		ArrayList<ArrayList<Vertex>> neighborhood = getKHop(vertex, new ArrayList<Vertex>(), k,0);
+		 getKHop(vertex, new ArrayList<Vertex>(), k,0);
 		
-		for(ArrayList<Vertex> neighbor : neighborhood){
+		System.out.println("Total time = "+(System.nanoTime()-starttime));
+		
+		/*for(ArrayList<Vertex> neighbor : neighborhood){
 			for(Vertex v : neighbor){
 				System.out.print(v.getId()+" ");
 			}
 			System.out.println();
-		}
+		}*/
 		
 		
 	}
@@ -99,6 +106,9 @@ public class Query {
 			
 			// iterate through all the edges
 			for(Edge edge : outEdges){	
+				
+				if(graph.getNumOutGoing(edge.getId())==0)
+					continue;
 				
 				int templevel = level;
 				

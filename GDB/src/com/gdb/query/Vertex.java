@@ -64,22 +64,17 @@ public class Vertex extends Element{
 				
 		// set the file pointer to the beginning of the node record
 		int nodeOffset = id*Constants.MAX_EDGES_NODES_DAT*4;
-		int startOffset=nodeOffset;
 		
-		// if direction is outgoing, skip 
-		if(direction.equals(Direction.OUT))
-			startOffset += this.getNumIncoming()*4;
 		
 		// if the direction is both, get both incoming as well as outgoing edges
 		if(direction.equals(Direction.BOTH)){
-			result = getNeighborEdges(startOffset, Direction.IN);
-			startOffset = this.getNumIncoming();
-			result.addAll(getNeighborEdges(startOffset, Direction.OUT));
-		}
-		
+			result = getNeighborEdges(nodeOffset, Direction.IN);
+			
+			result.addAll(getNeighborEdges(nodeOffset, Direction.OUT));
+		}		
 		// else get only the incoming/outgoing edges
 		else
-			result = getNeighborEdges(startOffset, direction);		
+			result = getNeighborEdges(nodeOffset, direction);		
 		
 		
 		return result;
@@ -102,26 +97,47 @@ public class Vertex extends Element{
 
 	
 
-	public ArrayList<Edge> getNeighborEdges(int startOffset, Direction direction){
+	public ArrayList<Edge> getNeighborEdges(int nodeOffset, Direction direction){
 		
 		ArrayList<Edge> neighborList = new ArrayList<Edge>();
 		Map<Byte,Short> neighborCount;
+		short offset;
+		int count = 0;
+		int localOffset;
 		
-		if(direction.equals(Direction.IN))
-			neighborCount = getIncomingEdgeCount();
+		if(direction.equals(Direction.IN)){
+			neighborCount = this.getIncomingEdgeCount();
+			offset = this.getNumOutgoing();
+			localOffset = nodeOffset+(offset%Constants.MAX_EDGES_NODES_DAT)*4;
+			count = count + offset;
+		}
 		else
-			neighborCount = getOutgoingEdgeCount();
+			neighborCount = this.getOutgoingEdgeCount();
+			offset = 0;
+			localOffset = nodeOffset;
 		
 		try {
-			RandomAccessFile dataFile = new RandomAccessFile(graph.dbPath+Constants.DATA_FILE,"rw");
-			dataFile.seek(startOffset);
+			int fileCount = offset/Constants.MAX_EDGES_NODES_DAT;
+			
+			
+			RandomAccessFile dataFile = new RandomAccessFile(graph.dbPath+"nodefile"+fileCount+".dat","r");
+			
+			dataFile.seek(localOffset);
 			
 			for(byte edgeType = 0; edgeType<Constants.NUMBER_OF_EDGE_TYPES; edgeType++){
 				if(neighborCount.containsKey(edgeType)){
 					 for(short i=0; i<neighborCount.get(edgeType); i++){
+						 
+						 if(count%Constants.MAX_EDGES_NODES_DAT==0 && count>=Constants.MAX_EDGES_NODES_DAT){
+							 dataFile.close();
+							 fileCount++;
+							 dataFile = new RandomAccessFile(graph.dbPath+"nodefile"+fileCount+".dat","r");
+							 dataFile.seek(nodeOffset);
+						 }
 						 int nodeId = dataFile.readInt();
 						 Edge edge = new Edge(edgeType, this.graph.getVertex(nodeId),direction);
 						 neighborList.add(edge);
+						 count++;
 					 }
 				}
 			}
@@ -136,8 +152,6 @@ public class Vertex extends Element{
 			e.printStackTrace();
 		}
 		
-	
-	
 		
 		
 		return neighborList;
@@ -219,6 +233,11 @@ public class Vertex extends Element{
 	public String toString(){
 		
 		return "\n Id: "+this.getId()+" label: "+this.getLabel()+"\n";
+	}
+	
+	public boolean equals(Object object){
+		
+		return this.id == ((Vertex)object).id;
 	}
 	
 }

@@ -78,8 +78,16 @@ public class Graph {
 			
 			Map<Byte,Short> incomingEdgeNums = new HashMap<Byte,Short>();
 			Map<Byte,Short> outgoingEdgeNums = new HashMap<Byte,Short>();
+			
 			//go through all of the node types and populate the edgeNums array
 			for(Byte edgeType = Constants.NUMBER_OF_EDGE_TYPES-1; edgeType >=0; edgeType--){
+				//extract the number of outgoing edges of each type
+				byte b11 = record[index++];
+				byte b22 = record[index++];				
+				short numNodesOutgoing = (short)(256*b11 + b22);
+				if(numNodesOutgoing!=0)
+				outgoingEdgeNums.put(edgeType, numNodesOutgoing);
+				
 				//extract the number of incoming edges of each type
 				byte b1 = record[index++];
 				byte b2 = record[index++];
@@ -87,12 +95,7 @@ public class Graph {
 				if(numNodesIncoming!=0)
 				incomingEdgeNums.put(edgeType, numNodesIncoming);
 				
-				//same for outoing
-				byte b11 = record[index++];
-				byte b22 = record[index++];				
-				short numNodesOutgoing = (short)(256*b11 + b22);
-				if(numNodesOutgoing!=0)
-				outgoingEdgeNums.put(edgeType, numNodesOutgoing);
+				
 			}
 			element.setIncomingEdgeNums(incomingEdgeNums);
 			element.setOutgoingEdgeNums(outgoingEdgeNums);

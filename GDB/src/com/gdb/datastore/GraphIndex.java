@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
@@ -50,7 +49,7 @@ public class GraphIndex {
 		System.out.println(sourcePath + "/nodes.dat");
 		nodeTypes = new ArrayList<Byte>();
 		while (s.hasNext()) {
-		nodeTypes.add(s.nextInt()-1, s.nextByte());
+			nodeTypes.add(s.nextInt() - 1, s.nextByte());
 			if (s.hasNext())
 				s.nextLine();
 		}
@@ -73,28 +72,27 @@ public class GraphIndex {
 			adjArray.add(new AdjacencyRecord());
 		}
 
-		int[] incoming = new int[nodeTypes.size()];
-		int[] outgoing = new int[nodeTypes.size()];
+		// int[] incoming = new int[nodeTypes.size()];
+		// int[] outgoing = new int[nodeTypes.size()];
 
 		Scanner s = new Scanner(new File(sourcePath + "/rel.dat"));
 		while (s.hasNext()) {
-			
-			int fromNode = s.nextInt()-1;
-			int toNode = s.nextInt()-1;
+
+			int fromNode = s.nextInt() - 1;
+			int toNode = s.nextInt() - 1;
 			byte edgeType = s.nextByte();
-			
 
-			outgoing[fromNode]++;
-			incoming[toNode]++;
-			if(outgoing[fromNode]<=16 && incoming[toNode]<=16){
-			
-				adjArray.get(fromNode).addOutGoing(toNode, edgeType);			
-				adjArray.get(toNode).addIncoming(fromNode, edgeType);
-			}
+			// outgoing[fromNode]++;
+			// incoming[toNode]++;
+			// if(outgoing[fromNode]<=16 && incoming[toNode]<=16){
 
-			//System.out.println("out for "+fromNode+" is "+adjArray.get(fromNode).getOutGoing().size());
-			//System.out.println("inf for "+toNode+" is "+adjArray.get(toNode).getInComing().size());
-		
+			adjArray.get(fromNode).addOutGoing(toNode, edgeType);
+			adjArray.get(toNode).addIncoming(fromNode, edgeType);
+			// }
+
+			// System.out.println("out for "+fromNode+" is "+adjArray.get(fromNode).getOutGoing().size());
+			// System.out.println("inf for "+toNode+" is "+adjArray.get(toNode).getInComing().size());
+
 			if (s.hasNext())
 				s.nextLine();
 		}
@@ -118,27 +116,23 @@ public class GraphIndex {
 	}
 
 	public void writeGraphIndex() throws IOException {
-		
-		new File(destinationPath
-				+ "/graph.idx").delete();
+
+		new File(destinationPath + "/gdb_data/graph.idx").delete();
 		RandomAccessFile file = new RandomAccessFile(destinationPath
-				+ "/graph.idx", "rw");
+				+ "/gdb_data/graph.idx", "rw");
 		for (int i = 0; i < adjArray.size(); i++) {
 			byte[] buffer = new byte[2 + 4 * Constants.NUMBER_OF_EDGE_TYPES];
 			buffer[0] = 0;
 			buffer[1] = nodeTypes.get(i);
 			int index = 2;
 			for (byte k = Constants.NUMBER_OF_EDGE_TYPES - 1; k >= 0; k--) {
-				short s = adjArray.get(i).getInComingCount()[k];
-				if(s>16)
-					System.out.println("incoming greater than 16 here for node "+i);
+				short s = adjArray.get(i).getOutGoingCount()[k];
 				buffer[index++] = (byte) (s >>> 8);
 				buffer[index++] = (byte) s;
-				s = adjArray.get(i).getOutGoingCount()[k];
-				if(s>16)
-					System.out.println("outgoing greater than 16 here for node "+i);
+				s = adjArray.get(i).getInComingCount()[k];
 				buffer[index++] = (byte) (s >>> 8);
 				buffer[index++] = (byte) s;
+
 			}
 			file.write(buffer);
 
@@ -150,12 +144,15 @@ public class GraphIndex {
 	public void writeNodesAndEdges() throws IOException {
 		
 		new File(destinationPath
-				+ "/nodefile.dat").delete();
-		
-		RandomAccessFile nFile = new RandomAccessFile(destinationPath
-				+ "/nodefile.dat", "rw");
+				+ "/gdb_data/nodefile0.dat").delete();
+		RandomAccessFile nFile = null;
 
 		for (int node = 0; node < adjArray.size(); node++) {
+			
+			 nFile = new RandomAccessFile(destinationPath
+					+ "/gdb_data/nodefile0.dat", "rw");
+			 nFile.seek(node*Constants.MAX_EDGES_NODES_DAT*4);
+			
 			// System.out.println("I= "+node);
 			byte[] nBuffer = new byte[4 * Constants.MAX_EDGES_NODES_DAT];
 			
@@ -166,6 +163,51 @@ public class GraphIndex {
 					node).getOutGoing();
 
 			int startBuffer = 0;
+			int count=0;
+			int fileCount = 0;
+			
+			// iterate through the outgoing list
+			for (Map.Entry<Byte, ArrayList<NeighborNodeRecord>> outEntry : outgoing
+					.entrySet()) {
+				
+				// get the arraylist of outgoing neighbors per edge type
+				ArrayList<NeighborNodeRecord> outlist = outEntry.getValue();
+
+				// iterate through each incoming neighbor
+				if (!(null == outlist))
+					for (NeighborNodeRecord outNeighbor : outlist) {
+						
+						if(count%Constants.MAX_EDGES_NODES_DAT==0 && count>=Constants.MAX_EDGES_NODES_DAT){
+							System.out.println("node : " + node + " "
+							+ Arrays.toString(nBuffer)+" nbuffer size = "+nBuffer.length);
+							nFile.write(nBuffer);
+							nFile.close();
+												
+														
+							fileCount++;
+							
+							 nFile = new RandomAccessFile(destinationPath
+									+ "/gdb_data/nodefile"+fileCount+".dat", "rw");
+							 startBuffer=0;
+							 nFile.seek(node*Constants.MAX_EDGES_NODES_DAT*4);
+							 nBuffer = new byte[4 * Constants.MAX_EDGES_NODES_DAT];
+						}
+
+						nBuffer[4 * startBuffer] = (byte) (outNeighbor
+								.getNeighborNode() >>> 24);
+						nBuffer[4 * startBuffer + 1] = (byte) (outNeighbor
+								.getNeighborNode() >>> 16);
+						nBuffer[4 * startBuffer + 2] = (byte) (outNeighbor
+								.getNeighborNode() >>> 8);
+						nBuffer[4 * startBuffer + 3] = (byte) outNeighbor
+								.getNeighborNode();
+						startBuffer++;
+						count++;
+						
+						
+					}
+
+			}
 
 			// iterate through the incoming list
 			for (Map.Entry<Byte, ArrayList<NeighborNodeRecord>> inEntry : incoming
@@ -177,7 +219,21 @@ public class GraphIndex {
 				// iterate through each incoming neighbor
 				if (!(null == inlist))
 					for (NeighborNodeRecord inNeighbor : inlist) {
-
+						
+						if(count%Constants.MAX_EDGES_NODES_DAT==0 && count>=Constants.MAX_EDGES_NODES_DAT){
+							System.out.println("node : " + node + " "
+									+ Arrays.toString(nBuffer)+" nbuffer size = "+nBuffer.length);
+							nFile.write(nBuffer);
+							nFile.close();
+							
+							fileCount++;
+							
+							 nFile = new RandomAccessFile(destinationPath
+									+ "/gdb_data/nodefile"+fileCount+".dat", "rw");
+							 startBuffer=0;
+							 nFile.seek(node*Constants.MAX_EDGES_NODES_DAT*4);
+							 nBuffer = new byte[4 * Constants.MAX_EDGES_NODES_DAT];
+						}
 						// store the 
 						nBuffer[4 * startBuffer] = (byte) (inNeighbor
 								.getNeighborNode() >>> 24);
@@ -189,41 +245,25 @@ public class GraphIndex {
 								.getNeighborNode();
 
 						startBuffer++;
+						count++;
+						
+						
+						
 					}
 
 			}
 
-			// iterate through the outgoing list
-			for (Map.Entry<Byte, ArrayList<NeighborNodeRecord>> outEntry : outgoing
-					.entrySet()) {
-
-				// get the arraylist of outgoing neighbors per edge type
-				ArrayList<NeighborNodeRecord> outlist = outEntry.getValue();
-
-				// iterate through each incoming neighbor
-				if (!(null == outlist))
-					for (NeighborNodeRecord outNeighbor : outlist) {
-
-						nBuffer[4 * startBuffer] = (byte) (outNeighbor
-								.getNeighborNode() >>> 24);
-						nBuffer[4 * startBuffer + 1] = (byte) (outNeighbor
-								.getNeighborNode() >>> 16);
-						nBuffer[4 * startBuffer + 2] = (byte) (outNeighbor
-								.getNeighborNode() >>> 8);
-						nBuffer[4 * startBuffer + 3] = (byte) outNeighbor
-								.getNeighborNode();
-						startBuffer++;
-					}
-
-			}
+			
 
 			nFile.write(nBuffer);
+			nFile.close();
 
-			System.out.println("node : " + node + " "
-					+ Arrays.toString(nBuffer)+" nbuffer size = "+nBuffer.length);
+			//System.out.println("node : " + node + " "
+					//+ Arrays.toString(nBuffer)+" nbuffer size = "+nBuffer.length);
 
 		}
-		nFile.close();
+	
+		
 		
 	}
 
@@ -235,6 +275,5 @@ public class GraphIndex {
 			System.out.println(adjArray.get(i));
 		}
 	}
-	
-	
+
 }
