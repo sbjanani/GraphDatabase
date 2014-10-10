@@ -63,18 +63,17 @@ public class Vertex extends Element {
 		// dbPath = path;
 		ArrayList<Edge> result;
 
-		// set the file pointer to the beginning of the node record
-		int nodeOffset = id * Constants.MAX_EDGES_NODES_DAT * 4;
+		
 
 		// if the direction is both, get both incoming as well as outgoing edges
 		if (direction.equals(Direction.BOTH)) {
-			result = getNeighborEdges(nodeOffset, Direction.IN);
+			result = getNeighborEdges( Direction.IN);
 
-			result.addAll(getNeighborEdges(nodeOffset, Direction.OUT));
+			result.addAll(getNeighborEdges( Direction.OUT));
 		}
 		// else get only the incoming/outgoing edges
 		else
-			result = getNeighborEdges(nodeOffset, direction);
+			result = getNeighborEdges( direction);
 
 		return result;
 	}
@@ -97,13 +96,15 @@ public class Vertex extends Element {
 		return null;
 	}
 
-	public ArrayList<Edge> getNeighborEdges(int nodeOffset, Direction direction) {
+	public ArrayList<Edge> getNeighborEdges( Direction direction) {
 
+		int nodeOffset = this.id*Constants.MAX_EDGES_NODES_DAT*4;
 		ArrayList<Edge> neighborList = new ArrayList<Edge>();
 		Map<Byte, Short> neighborCount;
 		short offset;
 		int count = 0;
 		
+		//System.out.println("nodeOffset = "+nodeOffset);
 		short totalNeighbors;
 
 		if (direction.equals(Direction.IN)) {
@@ -112,10 +113,15 @@ public class Vertex extends Element {
 			
 			count = count + offset;
 			totalNeighbors = this.getNumIncoming();
-		} else
+	
+		} else{
 			neighborCount = this.getOutgoingEdgeCount();
 		offset = 0;
 		totalNeighbors = this.getNumOutgoing();
+		}
+		
+		//System.out.println("offset = "+offset);
+		//System.out.println("Total Neighbors = "+totalNeighbors);
 
 		try {
 			
@@ -123,8 +129,9 @@ public class Vertex extends Element {
 			RandomAccessFile dataFile;
 
 			ArrayList<byte[]> edgeList = new ArrayList<byte[]>();
-			for (int i = offset / Constants.MAX_EDGES_NODES_DAT; i < totalNeighbors
-					/ Constants.MAX_EDGES_NODES_DAT; i++) {
+			double maxFiles = (double)(offset+totalNeighbors)/(double)Constants.MAX_EDGES_NODES_DAT;
+			
+			for (int i = offset / Constants.MAX_EDGES_NODES_DAT; i <= Math.ceil(maxFiles); i++) {
 
 				byte[] edges = new byte[Constants.MAX_EDGES_NODES_DAT * 4];
 				dataFile = new RandomAccessFile(graph.dbPath + "nodefile" + i
@@ -135,17 +142,22 @@ public class Vertex extends Element {
 				edgeList.add(edges);
 
 			}
-			int edgeCount = 0;
-			int index=(offset % Constants.MAX_EDGES_NODES_DAT)*4;
+			int edgeCount = offset % Constants.MAX_EDGES_NODES_DAT;
+			int index=edgeCount*4;
 			for (byte edgeType = 0; edgeType < Constants.NUMBER_OF_EDGE_TYPES; edgeType++) {
 				if (neighborCount.containsKey(edgeType)) {
 					for (short i = 0; i < neighborCount.get(edgeType); i++) {
 											
 						int arrayCounter = edgeCount/ Constants.MAX_EDGES_NODES_DAT;
-						int neighbor = (edgeList.get(arrayCounter)[index++] << 24 & 0xFF)
-								+ (edgeList.get(arrayCounter)[index++] << 16 & 0xFF)
-								+ (edgeList.get(arrayCounter)[index++] << 8 & 0xFF)
-								+ edgeList.get(arrayCounter)[index++];
+						//System.out.println("edgeCount = "+edgeCount);
+						//System.out.println("arraycounter = "+arrayCounter);
+						
+						int neighbor1 = (edgeList.get(arrayCounter)[index++] << 24);
+						int neighbor2 = (edgeList.get(arrayCounter)[index++] << 16);
+						int neighbor3 = (edgeList.get(arrayCounter)[index++] << 8);
+						int neighbor4 = (edgeList.get(arrayCounter)[index++] & 0x00FF );
+						int neighbor = neighbor1 | neighbor2 | neighbor3 | neighbor4;
+								
 
 						Edge edge = new Edge(edgeType,this.graph.getVertex(neighbor),direction);
 						neighborList.add(edge);
@@ -156,7 +168,7 @@ public class Vertex extends Element {
 					}
 				}
 			}
-
+			//System.out.println("Edge Count from map = "+edgeCount);
 			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block

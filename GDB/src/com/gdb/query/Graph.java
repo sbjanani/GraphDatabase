@@ -84,14 +84,14 @@ public class Graph {
 				//extract the number of outgoing edges of each type
 				byte b11 = record[index++];
 				byte b22 = record[index++];				
-				short numNodesOutgoing = (short)(256*b11 + b22);
+				short numNodesOutgoing = (short)((b11 << 8) | (b22 & 0x00FF));
 				if(numNodesOutgoing!=0)
 				outgoingEdgeNums.put(edgeType, numNodesOutgoing);
 				
 				//extract the number of incoming edges of each type
 				byte b1 = record[index++];
 				byte b2 = record[index++];
-				short numNodesIncoming = (short)(256*b1 + b2);
+				short numNodesIncoming = (short)((b1<<8 ) | (b2 & 0x00FF));
 				if(numNodesIncoming!=0)
 				incomingEdgeNums.put(edgeType, numNodesIncoming);
 				

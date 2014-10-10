@@ -51,12 +51,12 @@ public class Query {
 	 */
 	public void khopNeighborhood(Vertex vertex,int k,String vertexLabel) throws IOException{
 		
-		long starttime = System.nanoTime();
+		long starttime = System.currentTimeMillis();
 		
 		// arraylist containing khop neighborhood. start with level = 0
 		 getKHop(vertex, new ArrayList<Vertex>(), k,0);
 		
-		System.out.println("Total time = "+(System.nanoTime()-starttime));
+		System.out.println("Total time = "+(System.currentTimeMillis()-starttime));
 		
 		/*for(ArrayList<Vertex> neighbor : neighborhood){
 			for(Vertex v : neighbor){
@@ -77,6 +77,9 @@ public class Query {
 	 * @throws IOException 
 	 */
 	public ArrayList<ArrayList<Vertex>> getKHop(Vertex vertex, ArrayList<Vertex> visitedArray, int depth, int level) throws IOException{
+		
+		if(vertex.getNumOutgoing()==0)
+			return null;
 		
 		if(visitedArray.contains(vertex))
 			return null;
@@ -107,7 +110,7 @@ public class Query {
 			// iterate through all the edges
 			for(Edge edge : outEdges){	
 				
-				if(graph.getNumOutGoing(edge.getId())==0)
+				if(graph.getGraphIndex().get(edge.getId()).getOutgoingEdgeNums()==null)
 					continue;
 				
 				int templevel = level;
