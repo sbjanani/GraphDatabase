@@ -12,7 +12,7 @@ public class GraphTester {
 		System.out.println(rag.readInt());
 		rag.close();*/
 		Graph g = new Graph("/home/data/Gplus/gdb_data/");
-		Vertex v = g.getVertex(355);
+		Vertex v = g.getVertex(44);
 		System.out.println("V id and label: "+v);
 		//System.out.println(v.getEdges(Direction.OUT).size());
 		//System.out.println(v.getEdges(Direction.IN).size());
@@ -21,6 +21,8 @@ public class GraphTester {
 		//System.out.println(g.getVertex(65));
 		//System.out.println(g.getVertices(0));*/
 		Query q = new Query(g);		
-		q.khopNeighborhood(v, 3, "");//use vertex 355
+		long startTime = System.currentTimeMillis();
+		q.khop(v,4);//use vertex 355
+		System.out.println("Total time ="+ (System.currentTimeMillis()-startTime));
 	}
 }

@@ -3,6 +3,7 @@ package com.gdb.query;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map;
 
 /**
@@ -141,6 +142,49 @@ public class Query {
 		
 		
 	}
+	
+	 protected void khop(Vertex vertex, int k) throws IOException{
+         
+         
+
+         ArrayList<Vertex> curr = new ArrayList<Vertex>();
+         ArrayList<Vertex> next = new ArrayList<Vertex>();
+         HashSet<Object> result = new HashSet<Object>();
+
+         curr.add(vertex);
+
+         for(int real_hops = 0; real_hops < k; real_hops++) {
+
+                 for (Vertex u : curr) {
+
+                        
+
+                         Iterable<Edge> itr = u.getEdges(Direction.OUT);
+                         for (Edge r : itr) {
+                                 Vertex v = r.getVertex();
+
+                                
+
+                                 if (result.add(v.getId())) {
+                                         next.add(v);
+                                 }
+                         }
+                 }
+
+                 if(next.size() == 0)
+                         break;
+
+                 ArrayList<Vertex> tmp = curr;
+                 curr = next;
+                 tmp.clear();
+                 next = tmp;
+         }
+         
+         System.out.println("Total neighborhood = "+result.size());
+
+              
+ }
+
 
 	
 }
