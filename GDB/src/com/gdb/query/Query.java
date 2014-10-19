@@ -159,7 +159,7 @@ public class Query {
 
                         
 
-                         Iterable<Edge> itr = u.getEdges(Direction.OUT);
+                         Iterable<Edge> itr = u.getEdges(Direction.BOTH);
                          for (Edge r : itr) {
                                  Vertex v = r.getVertex();
 
@@ -169,6 +169,7 @@ public class Query {
                                          next.add(v);
                                  }
                          }
+                         
                  }
 
                  if(next.size() == 0)
@@ -180,7 +181,7 @@ public class Query {
                  next = tmp;
          }
          
-         System.out.println("Total neighborhood = "+result.size());
+        //System.out.println("Total neighborhood = "+result.size());
 
               
  }

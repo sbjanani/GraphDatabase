@@ -91,7 +91,7 @@ public class Graph {
 				//extract the number of incoming edges of each type
 				byte b1 = record[index++];
 				byte b2 = record[index++];
-				short numNodesIncoming = (short)((b1<<8 ) | (b2 & 0x00FF));
+				short numNodesIncoming = (short)(((b1 <<8 )& 0xFFFF) | (b2 & 0x00FF));
 				if(numNodesIncoming!=0)
 				incomingEdgeNums.put(edgeType, numNodesIncoming);
 				
@@ -193,7 +193,7 @@ public class Graph {
 	 * @throws IOException 
 	 */
 	public Vertex getVertex(int id) throws IOException{
-		
+		//System.out.println("id="+id);
 		Vertex v = new Vertex(id,this,graphIndex.get(id).getVertexType());	
 		v.setNumIncoming(getNumIncoming(id));
 		v.setNumOutgoing(getNumOutGoing(id));
