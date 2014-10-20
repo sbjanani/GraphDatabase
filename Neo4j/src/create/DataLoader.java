@@ -114,20 +114,24 @@ public class DataLoader {
 
 		
 		TransactionalGraph graph = new Neo4jGraph(destinationPath);
-		BatchGraph<TransactionalGraph> bgraph = new BatchGraph<TransactionalGraph>(graph, VertexIDType.NUMBER, 1000);
+		
+		
+		for(int node=0; node<nodeTypes.size(); node++){
+			Vertex vertex = graph.addVertex(new Long(node));
+			vertex.setProperty("ident", node);
+			vertex.setProperty("label", nodeTypes.get(node));
+			System.out.println("Writing vertex "+node);
+		}
+		graph.shutdown();
+		
+		BatchGraph<TransactionalGraph> bgraph = new BatchGraph<TransactionalGraph>(graph, VertexIDType.NUMBER, 5000);
 		bgraph.setLoadingFromScratch(true);	
 		
 		for (int node = 0; node < adjArray.size(); node++) {
 			
 			Vertex vertex  = bgraph.getVertex(new Long(node));
 			
-			if(null==vertex){
-				vertex = bgraph.addVertex(new Long(node));
-				
-			}
-			vertex.setProperty("label", nodelabels[nodeTypes.get(node)]);
-			
-			
+						
 			Map<Byte, ArrayList<NeighborNodeRecord>> outgoing = adjArray.get(
 					node).getOutGoing();
 
@@ -145,8 +149,7 @@ public class DataLoader {
 					for (NeighborNodeRecord outNeighbor : outlist) {
 						
 						Vertex outVertex = bgraph.getVertex(new Long(outNeighbor.getNeighborNode()));
-						if(outVertex==null)
-							outVertex = bgraph.addVertex(outNeighbor.getNeighborNode());
+						
 												
 						bgraph.addEdge(null, vertex, outVertex, edgelabels[outNeighbor.getEdgeType()]);
 						count++;

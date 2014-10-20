@@ -355,6 +355,16 @@ public Vertex getVertex(Graph graph, String key, Object value){
                                          next.add(v);
                                  }
                          }
+                         Iterable<Edge> in = u.getEdges(Direction.IN);
+                         for (Edge r : in) {
+                                 Vertex v = r.getVertex(Direction.OUT);
+
+                                
+
+                                 if (result.add(v.getId())) {
+                                         next.add(v);
+                                 }
+                         }
                  }
 
                  if(next.size() == 0)
@@ -366,7 +376,72 @@ public Vertex getVertex(Graph graph, String key, Object value){
                  next = tmp;
          }
          
-         System.out.println("Total neighborhood = "+result.size());
+         //System.out.println("Total neighborhood = "+result.size());
+		
+		
+		
+	}
+	
+	public void khopNeighborhood(Vertex vertex, Graph graph, int k, String[]labels) {
+
+		/*long startTime = System.currentTimeMillis();
+		// arraylist containing khop neighborhood. start with level = 0
+		ArrayList<ArrayList<Vertex>> neighborhood = getKHop(vertex,
+				new ArrayList<Vertex>(), depth, 0);
+
+		/*for (ArrayList<Vertex> neighbor : neighborhood) {
+			for (Vertex v : neighbor) {
+				System.out.print(v.getId() + " ");
+			}
+			System.out.println("\n******************");
+		}*/
+
+		/*long stopTime = System.currentTimeMillis();
+		execTime = stopTime - startTime;*/
+ 	 ArrayList<Vertex> curr = new ArrayList<Vertex>();
+         ArrayList<Vertex> next = new ArrayList<Vertex>();
+         HashSet<Object> result = new HashSet<Object>();
+
+         curr.add(vertex);
+
+         for(int real_hops = 0; real_hops < k; real_hops++) {
+
+                 for (Vertex u : curr) {
+
+                        
+
+                         Iterable<Edge> itr = u.getEdges(Direction.OUT, labels);
+                         for (Edge r : itr) {
+                                 Vertex v = r.getVertex(Direction.IN);
+
+                                
+
+                                 if (result.add(v.getId())) {
+                                         next.add(v);
+                                 }
+                         }
+                        /* Iterable<Edge> in = u.getEdges(Direction.IN,labels);
+                         for (Edge r : in) {
+                                 Vertex v = r.getVertex(Direction.OUT);
+
+                                
+
+                                 if (result.add(v.getId())) {
+                                         next.add(v);
+                                 }
+                         }*/
+                 }
+
+                 if(next.size() == 0)
+                         break;
+
+                 ArrayList<Vertex> tmp = curr;
+                 curr = next;
+                 tmp.clear();
+                 next = tmp;
+         }
+         
+         //System.out.println("Total neighborhood = "+result.size());
 		
 		
 		
