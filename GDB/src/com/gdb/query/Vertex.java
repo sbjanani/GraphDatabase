@@ -1,10 +1,13 @@
 package com.gdb.query;
 
+import java.util.List;
 import java.io.EOFException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 
 import com.gdb.util.Constants;
@@ -45,29 +48,136 @@ public class Vertex extends Element {
 	 * @return - returns an ArrayList containing the Edge objects
 	 * @throws IOException
 	 */
-	public ArrayList<Edge> getEdges(Direction direction, int[] labels)
+	public ArrayList<Edge> getEdges(Direction direction, ArrayList<Byte>labelList)
 			throws IOException {
 		
-		ArrayList<Edge> edgeList = new ArrayList<Edge>();
+		Collections.sort(labelList);
 		
-		boolean exists=false;
-		ArrayList<Integer> inList = new ArrayList<Integer>();
-		ArrayList<Integer> outList = new ArrayList<Integer>();
+		ArrayList<Edge> edgeList = new ArrayList<Edge>();
+		ArrayList<Byte> labels = new ArrayList<Byte>();
+		
+		
+		
+		
+			
+			int edgeTypeOffset;
+			
+			ArrayList<Integer> offsetList = new ArrayList<Integer>();			
+			ArrayList<Map<Byte, Short>> neighborCountList = new ArrayList<Map<Byte,Short>>(); 
 
-		for(int label : labels){
 			if(direction.equals(Direction.IN)){
-				if(this.getIncomingEdgeCount().containsKey(label))
-					inList.add(label);
+				
+				for(int i=0; i<labelList.size();i++){
+					if(this.getIncomingEdgeCount().containsKey(labelList.get(i))){
+						labels.add(labelList.get(i));
+					}
+				}
+				
+				if(labels.size()==0)
+					return null;
+		
+				neighborCountList.add(this.getIncomingEdgeCount());
+						
+				edgeTypeOffset=this.getNumOutgoing();
+				
+				for(Map.Entry<Byte, Short> incomingcount : this.getIncomingEdgeCount().entrySet()){
+					if(labelList.contains(incomingcount.getKey())){
+						offsetList.add(edgeTypeOffset);
+						edgeTypeOffset += incomingcount.getValue();
+						offsetList.add(edgeTypeOffset);
+					}
+					else
+						edgeTypeOffset += incomingcount.getValue();
+					
+					
+				}
+				
+				edgeList = getNeighborEdges(offsetList, neighborCountList,labels, direction);
 			}
 			else if(direction.equals(Direction.OUT)){
-				if(this.getOutgoingEdgeCount().containsKey(label))
-					outList.add(label);
+				
+				for(int i=0; i<labelList.size();i++){
+					if(this.getOutgoingEdgeCount().containsKey(labelList.get(i))){
+						labels.add(labelList.get(i));
+					}
+				}
+				
+				
+				if(labels.size()==0)
+					return null;
+				neighborCountList.add(this.getOutgoingEdgeCount());				
+				
+				edgeTypeOffset=0;
+				
+				for(Map.Entry<Byte, Short> outgoingcount : this.getOutgoingEdgeCount().entrySet()){
+					if(labelList.contains(outgoingcount.getKey())){
+						offsetList.add(edgeTypeOffset);
+						edgeTypeOffset += outgoingcount.getValue();
+						offsetList.add(edgeTypeOffset);
+					}
+					else
+						edgeTypeOffset += outgoingcount.getValue();
+					
+					
+				}
+				
+				edgeList = getNeighborEdges(offsetList, neighborCountList,labels, direction);
 			}
-		}
-		
-		if((null==inList) && (null==outList))
-			return null;
-		else edgeList = getNeighborEdges(direction, inList, outList);
+			else{
+				
+					for(int i=0; i<labelList.size();i++){
+						if(this.getIncomingEdgeCount().containsKey(labelList.get(i))){
+							labels.add(labelList.get(i));
+						}
+					}
+					for(int i=0; i<labelList.size();i++){
+						if(this.getOutgoingEdgeCount().containsKey(labelList.get(i))){
+							labels.add(labelList.get(i));
+						}
+					}
+					
+					
+					if(labels.size()==0)
+						return null;
+					
+					neighborCountList.add(this.getOutgoingEdgeCount());
+					neighborCountList.add(this.getIncomingEdgeCount());
+					
+					edgeTypeOffset=0;
+					
+					for(Map.Entry<Byte, Short> outgoingcount : this.getOutgoingEdgeCount().entrySet()){
+						if(labelList.contains(outgoingcount.getKey())){
+							offsetList.add(edgeTypeOffset);
+							edgeTypeOffset += outgoingcount.getValue();
+							offsetList.add(edgeTypeOffset);
+						}
+						else
+							edgeTypeOffset += outgoingcount.getValue();
+						
+						
+					}
+				
+				
+					edgeTypeOffset=this.getNumOutgoing();
+					for(Map.Entry<Byte, Short> incomingcount : this.getIncomingEdgeCount().entrySet()){
+						if(labelList.contains(incomingcount.getKey())){
+							offsetList.add(edgeTypeOffset);
+							edgeTypeOffset += incomingcount.getValue();
+							offsetList.add(edgeTypeOffset);
+						}
+						else
+							edgeTypeOffset += incomingcount.getValue();
+						
+						
+					}
+							
+					edgeList = getNeighborEdges(offsetList, neighborCountList,labels, direction);
+			}
+			
+							
+			
+		//System.out.println("Vertex : "+this.getId()+" Neighborhood :"+edgeList);
+			
 		
 		
 		return edgeList;
@@ -86,21 +196,31 @@ public class Vertex extends Element {
 		// dbPath = path;
 		ArrayList<Edge> result;
 		short offset;
-		short totalNeighbors;
+		int totalNeighbors;
+		ArrayList<Map<Byte, Short>> neighborCountList = new ArrayList<Map<Byte,Short>>(); 
 
-		
-		
-
-		// if the direction is both, get both incoming as well as outgoing edges
-		if (direction.equals(Direction.BOTH)) {
-			result = getNeighborEdges( Direction.IN);
-
-			result.addAll(getNeighborEdges( Direction.OUT));
+		if(direction.equals(Direction.IN)){
+			neighborCountList.add(this.getIncomingEdgeCount());
+			offset = this.getNumOutgoing();			
+			totalNeighbors = this.getNumIncoming();
 		}
-		// else get only the incoming/outgoing edges
-		else
-			result = getNeighborEdges( direction);
+		else if(direction.equals(Direction.OUT)){
+			neighborCountList.add(this.getOutgoingEdgeCount());
+			offset = 0;
+			totalNeighbors = this.getNumOutgoing();
+		}
+		else{
+			neighborCountList.add(this.getOutgoingEdgeCount());
+			neighborCountList.add(this.getIncomingEdgeCount());
+			offset=0;
+			totalNeighbors = this.getNumIncoming()+this.getNumOutgoing();
+			
+		}
+			
+		result = getNeighborEdges(neighborCountList, offset, totalNeighbors,direction);
+		
 
+		
 		return result;
 	}
 
@@ -122,33 +242,12 @@ public class Vertex extends Element {
 		return null;
 	}
 
-	public ArrayList<Edge> getNeighborEdges( Direction direction) {
+	public ArrayList<Edge> getNeighborEdges(ArrayList<Map<Byte,Short>> neighborCountList, int offset, int totalNeighbors, Direction direction) {
 
 		int nodeOffset = this.id*Constants.MAX_EDGES_NODES_DAT*4;
 		ArrayList<Edge> neighborList = new ArrayList<Edge>();
-		Map<Byte, Short> neighborCount;
-		short offset;
-		int count = 0;
 		
-		//System.out.println("nodeOffset = "+nodeOffset);
-		short totalNeighbors;
-
-		if (direction.equals(Direction.IN)) {
-			neighborCount = this.getIncomingEdgeCount();
-			offset = this.getNumOutgoing();
-			
-			count = count + offset;
-			totalNeighbors = this.getNumIncoming();
 	
-		} else{
-			neighborCount = this.getOutgoingEdgeCount();
-		offset = 0;
-		totalNeighbors = this.getNumOutgoing();
-		}
-		
-		//System.out.println("offset = "+offset);
-		//System.out.println("Total Neighbors = "+totalNeighbors);
-
 		try {
 			
 
@@ -170,6 +269,11 @@ public class Vertex extends Element {
 			}
 			int edgeCount = offset % Constants.MAX_EDGES_NODES_DAT;
 			int index=edgeCount*4;
+			if(direction.equals(Direction.BOTH))
+			 direction = Direction.OUT;
+			
+			for(Map<Byte,Short> neighborCount : neighborCountList){
+				
 			for (byte edgeType = 0; edgeType < Constants.NUMBER_OF_EDGE_TYPES; edgeType++) {
 				if (neighborCount.containsKey(edgeType)) {
 					for (short i = 0; i < neighborCount.get(edgeType); i++) {
@@ -199,6 +303,8 @@ public class Vertex extends Element {
 					}
 				}
 			}
+			direction = Direction.IN;
+		}
 			//System.out.println("Edge Count from map = "+edgeCount);
 			
 		}catch(EOFException e){
@@ -216,83 +322,69 @@ public class Vertex extends Element {
 		return neighborList;
 	}
 	
-	public ArrayList<Edge> getNeighborEdges( Direction direction, ArrayList<Integer> inList, ArrayList<Integer> outList) {
+	public ArrayList<Edge> getNeighborEdges( ArrayList<Integer> offsetList , ArrayList<Map<Byte,Short>> neighborCountList, ArrayList<Byte> labelList, Direction direction) {
+		
 
 		int nodeOffset = this.id*Constants.MAX_EDGES_NODES_DAT*4;
 		ArrayList<Edge> neighborList = new ArrayList<Edge>();
-		Map<Byte, Short> neighborCount;
-		short offset;
-		int count = 0;
+		Direction dir = direction;
 		
-		//System.out.println("nodeOffset = "+nodeOffset);
-		short totalNeighbors;
-
-		if (direction.equals(Direction.IN)) {
-			neighborCount = this.getIncomingEdgeCount();
-			offset = this.getNumOutgoing();
-			
-			count = count + offset;
-			totalNeighbors = this.getNumIncoming();
-	
-		} else{
-			neighborCount = this.getOutgoingEdgeCount();
-		offset = 0;
-		totalNeighbors = this.getNumOutgoing();
-		}
 		
-		//System.out.println("offset = "+offset);
-		//System.out.println("Total Neighbors = "+totalNeighbors);
-
 		try {
 			
 
 			RandomAccessFile dataFile;
 
-			ArrayList<byte[]> edgeList = new ArrayList<byte[]>();
-			double maxFiles = (double)(offset+totalNeighbors)/(double)Constants.MAX_EDGES_NODES_DAT;
 			
-			for (int i = offset / Constants.MAX_EDGES_NODES_DAT; i <= Math.ceil(maxFiles); i++) {
-
-				byte[] edges = new byte[Constants.MAX_EDGES_NODES_DAT * 4];
-				dataFile = new RandomAccessFile(graph.dbPath + "nodefile" + i
-						+ ".dat", "r");
-				dataFile.seek(nodeOffset);
-				dataFile.readFully(edges);
-				dataFile.close();
-				edgeList.add(edges);
-
-			}
-			int edgeCount = offset % Constants.MAX_EDGES_NODES_DAT;
-			int index=edgeCount*4;
-			for (byte edgeType = 0; edgeType < Constants.NUMBER_OF_EDGE_TYPES; edgeType++) {
-				if (neighborCount.containsKey(edgeType)) {
-					for (short i = 0; i < neighborCount.get(edgeType); i++) {
-											
-						int arrayCounter = edgeCount/ Constants.MAX_EDGES_NODES_DAT;
-						//System.out.println("edgeCount = "+edgeCount);
-						//System.out.println("arraycounter = "+arrayCounter);
-						
-						
-						
-						int neighbor1 = (edgeList.get(arrayCounter)[index++] << 24)& 0xFFFFFFFF;
-						int neighbor2 = (edgeList.get(arrayCounter)[index++] << 16)& 0x00FFFFFF;
-						int neighbor3 = (edgeList.get(arrayCounter)[index++] << 8) & 0x0000FFFF;
-						int neighbor4 = (edgeList.get(arrayCounter)[index++]& 0x000000FF );
-						//System.out.println("offset = "+nodeOffset);
-						//System.out.println(neighbor1 +" "+neighbor2+" "+Integer.toBinaryString(neighbor3)+" "+Integer.toBinaryString(neighbor4));
-						int neighbor = neighbor1 | neighbor2 | neighbor3 | neighbor4;
-								
-						//System.out.println("neighbor="+neighbor);
-
-						Edge edge = new Edge(edgeType,this.graph.getVertex(neighbor),direction);
-						neighborList.add(edge);
-						
-						edgeCount++;
-						if(edgeCount%Constants.MAX_EDGES_NODES_DAT==0)
-							  index = 0;
-					}
+			
+			
+			for(int offset=0; offset<offsetList.size(); offset +=2){
+				
+				ArrayList<byte[]> edgeList = new ArrayList<byte[]>();
+				if(direction.equals(Direction.BOTH)){
+					if(offset<labelList.size())
+						dir=Direction.OUT;
+					else
+						dir = Direction.IN;
 				}
-			}
+				double maxFiles = (double)offsetList.get(offset+1)/(double)Constants.MAX_EDGES_NODES_DAT;
+				for (int i = offsetList.get(offset) / Constants.MAX_EDGES_NODES_DAT; i < Math.ceil(maxFiles); i++) {
+
+					byte[] edges = new byte[Constants.MAX_EDGES_NODES_DAT * 4];
+					dataFile = new RandomAccessFile(graph.dbPath + "nodefile" + i
+							+ ".dat", "r");
+					dataFile.seek(nodeOffset);
+					dataFile.readFully(edges);
+					dataFile.close();					
+					
+					edgeList.add(edges);
+
+				}
+				
+				byte edgeLabel = labelList.get((offset/labelList.size())%labelList.size());
+				int edgeCount = offsetList.get(offset) % Constants.MAX_EDGES_NODES_DAT;
+				int index=edgeCount*4;
+				Map<Byte,Short> neighborCount = neighborCountList.get(offset/(2*labelList.size()));
+				for(short j=0; j<neighborCount.get(edgeLabel);j++){
+					int arrayCounter = edgeCount/ Constants.MAX_EDGES_NODES_DAT;
+					int neighbor1 = (edgeList.get(arrayCounter)[index++] << 24)& 0xFFFFFFFF;
+					int neighbor2 = (edgeList.get(arrayCounter)[index++] << 16)& 0x00FFFFFF;
+					int neighbor3 = (edgeList.get(arrayCounter)[index++] << 8) & 0x0000FFFF;
+					int neighbor4 = (edgeList.get(arrayCounter)[index++]& 0x000000FF );
+					
+					int neighbor = neighbor1 | neighbor2 | neighbor3 | neighbor4;
+					
+					Edge edge = new Edge(edgeLabel,this.graph.getVertex(neighbor),dir);
+					neighborList.add(edge);
+					
+					edgeCount++;
+					if(edgeCount%Constants.MAX_EDGES_NODES_DAT==0)
+						  index = 0;
+				}
+				
+			}		
+			
+			
 			//System.out.println("Edge Count from map = "+edgeCount);
 			
 		} catch (FileNotFoundException e) {

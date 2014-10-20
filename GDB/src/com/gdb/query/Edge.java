@@ -46,6 +46,6 @@ public class Edge extends Element {
 	
 
 	public String toString(){
-		return "\n Direction: "+direction+" Vertex: "+vertex.getId()+"\n";
+		return "\n Direction: "+direction+" Label: "+this.getLabel()+" Vertex: "+vertex.getId()+"\n";
 	}
 }
