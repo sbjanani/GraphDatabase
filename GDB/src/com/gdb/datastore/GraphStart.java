@@ -10,23 +10,19 @@ import java.util.ArrayList;
  */
 public class GraphStart {
 
-        /**
-         * This is the starting point of the application
-         * @param args
-         * @throws IOException 
-         */
-        public static void main(String args[]) throws IOException{
-        	
-                GraphIndex gi = new GraphIndex("/home/data/Gplus", "/home/data/Gplus/gdb_data");
-                gi.readNodes();
-                gi.readEdges();
-                //gi.displayAdjRecord();                
-                gi.writeGraph();
-                
-             /*   RandomAccessFile raf = new RandomAccessFile("nodefile.dat","r");
-                raf.seek(65);
-                System.out.println(raf.readInt());
-                raf.close();*/
-                
-        }
+    /**
+     * This is the starting point of the application
+     * @param args
+     * @throws IOException
+     */
+    public static void main(String args[]) throws IOException{
+
+        GraphIndex gi = new GraphIndex("/home/data/Gplus/biggraphs", "/home/data/Gplus/biggraphs/gdb_data");
+                /*gi.readNodes();
+                gi.readEdges();           
+                gi.writeGraph();*/
+        double startTime = System.currentTimeMillis();
+        gi.readAndWriteFile();
+        System.out.println("Load time = " + (System.currentTimeMillis() - startTime));
+    }
 }
