@@ -28,6 +28,8 @@ public class Index {
 	 */
 	Map<Byte,Short> incomingEdgeNums;
 	Map<Byte,Short> outgoingEdgeNums;
+
+	byte propBitmap;
 	/**
 	 * @return the vertexId
 	 */
@@ -53,7 +55,7 @@ public class Index {
 		this.vertexType = vertexType;
 	}
 
-	
+
 	/**
 	 * @return the deleted
 	 */
@@ -90,7 +92,19 @@ public class Index {
 	public void setOutgoingEdgeNums(Map<Byte, Short> outgoingEdgeNums) {
 		this.outgoingEdgeNums = outgoingEdgeNums;
 	}
-	
+
+	/**
+	 * @return the propBitmap
+	 */
+	public byte getPropBitmap() {
+		return propBitmap;
+	}
+	/**
+	 * @param propBitmap the propBitmap to set
+	 */
+	public void setPropBitmap(byte propBitmap) {
+		this.propBitmap = propBitmap;
+	}
 	public String toString(){
 		String s = "Vertex ID: "+vertexId+ " Vertex Type: "+vertexType+"\n";
 		s += "\n incoming \n";
@@ -101,9 +115,9 @@ public class Index {
 		for(Map.Entry<Byte, Short> countEntry : outgoingEdgeNums.entrySet()){
 			s += countEntry.getKey()+":"+countEntry.getValue()+";";
 		}
-		
+
 		return s+"\n";
 	}
-	
-	
+
+
 }

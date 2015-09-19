@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import com.blueprints.compare.Queries;
+import com.compare.Queries;
 import com.gdb.query.Graph;
 import com.gdb.util.Constants;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
@@ -21,7 +21,7 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 
 public class GraphCompare {
 
-	com.blueprints.compare.NeoTester neoTester = new com.blueprints.compare.NeoTester();
+	com.compare.NeoTester neoTester = new com.compare.NeoTester();
 	com.gdb.query.GdbTester gdbTester = new com.gdb.query.GdbTester();
 	
 	public static void main(String args[]) throws IOException, SQLException{

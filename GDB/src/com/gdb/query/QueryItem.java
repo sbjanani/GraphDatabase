@@ -1,5 +1,6 @@
 package com.gdb.query;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -7,12 +8,16 @@ import java.util.Map;
  * @author sysadmin
  *
  */
-public class QueryItem {
+public class QueryItem implements Serializable {
 
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 1L;
 	/**
 	 * The vertex label specified in the query
 	 */
-	int vertexLabel;
+	byte vertexLabel;
 	/**
 	 * Attribute list for the vertex
 	 */
@@ -24,25 +29,25 @@ public class QueryItem {
 	/**
 	 * Edge label specified in the query
 	 */
-	int edgeLabel;
+	byte edgeLabel;
 	/**
 	 * Attribute list for the edge
 	 */
 	Map<String, Object> edgeAttributeMap;
-	
+
 	/**
 	 * @return the type
 	 */
-	public int getType() {
+	public byte getVertexLabel() {
 		return vertexLabel;
 	}
 	/**
-	 * @param type the type to set
+	 * @param vertexLabel the type to set
 	 */
-	public void setType(int vertexLabel) {
+	public void setVertexLabel(byte vertexLabel) {
 		this.vertexLabel = vertexLabel;
 	}
-	
+
 	/**
 	 * @return the direction
 	 */
@@ -58,13 +63,13 @@ public class QueryItem {
 	/**
 	 * @return the edgeLabel
 	 */
-	public int getEdgeLabel() {
+	public byte getEdgeLabel() {
 		return edgeLabel;
 	}
 	/**
 	 * @param edgeLabel the edgeLabel to set
 	 */
-	public void setEdgeLabel(int edgeLabel) {
+	public void setEdgeLabel(byte edgeLabel) {
 		this.edgeLabel = edgeLabel;
 	}
 	/**
@@ -74,10 +79,10 @@ public class QueryItem {
 		return vertexAttributeMap;
 	}
 	/**
-	 * @param attributeMap the attributeMap to set
+	 * @param vertexAttributeMap the edgeLabel to set
 	 */
-	public void setAttributeMap(Map<String, Object> vertexAattributeMap) {
-		this.vertexAttributeMap = vertexAattributeMap;
+	public void setAttributeMap(Map<String, Object> vertexAttributeMap) {
+		this.vertexAttributeMap = vertexAttributeMap;
 	}
 	/**
 	 * @return the edgeAttributeMap
@@ -91,6 +96,9 @@ public class QueryItem {
 	public void setEdgeAttributeMap(Map<String, Object> edgeAttributeMap) {
 		this.edgeAttributeMap = edgeAttributeMap;
 	}
-	
-	
+
+	public String toString(){
+		return "vertex label:"+this.getVertexLabel()+"\n vertex properties:"+this.getVertexAttributeMap()+"\n edge label:"+this.getEdgeLabel()+"\n edge properties:"+this.getEdgeAttributeMap();
+	}
+
 }
