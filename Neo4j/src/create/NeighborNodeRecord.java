@@ -1,17 +1,26 @@
 package create;
 
-public class NeighborNodeRecord  {
-	public int neighborNode;
-	public byte edgeType;
+import java.util.HashMap;
+import java.util.Map;
 
-	
-	public NeighborNodeRecord(int nodeNumber, byte edgeType) {
+public class NeighborNodeRecord  {
+	int neighborNode;
+	byte edgeType;
+	Map<String,Object> pmap = new HashMap<String,Object>();
+
+
+	public NeighborNodeRecord(int nodeNumber, byte edgeType,Map<String,Object> pmap) {
 		//neighborNode = n;
 		this.neighborNode = nodeNumber;
 		this.edgeType = edgeType;
-		
+		this.pmap=pmap;
+
+
 	}
-	
+
+
+
+
 
 	/**
 	 * @return the neighborNode
@@ -27,7 +36,7 @@ public class NeighborNodeRecord  {
 		this.neighborNode = neighborNode;
 	}
 
-	
+
 
 	/**
 	 * @return the edgeType
@@ -44,7 +53,23 @@ public class NeighborNodeRecord  {
 		this.edgeType = edgeType;
 	}
 
-	
-	
-	
+
+	/**
+	 * @return the pmap
+	 */
+	public Map<String, Object> getPmap() {
+		return pmap;
+	}
+
+
+	/**
+	 * @param pmap the pmap to set
+	 */
+	public void setPmap(Map<String, Object> pmap) {
+		this.pmap = pmap;
+	}
+
+
+
+
 }
